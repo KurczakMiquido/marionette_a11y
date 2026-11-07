@@ -1,6 +1,17 @@
+export 'src/a11y_cli_runner.dart';
+export 'src/cli_failure.dart';
+export 'src/commands/check_command.dart';
+export 'src/commands/native_command.dart';
+export 'src/commands/probe_command.dart';
+export 'src/cross_check.dart';
+export 'src/flutter_snapshot_client.dart';
 export 'src/models/a11y_rect.dart';
+export 'src/models/check_report.dart';
+export 'src/models/finding.dart';
 export 'src/models/flutter_node.dart';
 export 'src/models/native_issue.dart';
 export 'src/models/native_node.dart';
 export 'src/models/native_screen.dart';
 export 'src/models/native_tree.dart';
+export 'src/models/node_match.dart';
+export 'src/native_probe.dart';

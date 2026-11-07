@@ -1,0 +1,171 @@
+import 'models/a11y_rect.dart';
+import 'models/check_report.dart';
+import 'models/finding.dart';
+import 'models/flutter_node.dart';
+import 'models/native_node.dart';
+import 'models/native_tree.dart';
+import 'models/node_match.dart';
+
+/// Joins the Flutter semantics snapshot with the native tree and reports where they disagree.
+class CrossCheck {
+  static const iouThreshold = 0.6;
+  static const _source = 'crosscheck';
+  static const _sameIou = 1e-9;
+
+  static CheckReport run(List<FlutterNode> flutterNodes, NativeTree native) {
+    final onScreen = [
+      for (final f in flutterNodes)
+        if (!f.offscreen) f,
+    ];
+    final matched = _match(onScreen, native.nodes);
+    final flutterIdByPath = {
+      for (final (i, m) in matched.indexed)
+        if (m != null) m.node.path: onScreen[i].id,
+    };
+
+    final findings = <Finding>[];
+    for (final (i, f) in onScreen.indexed) {
+      final n = matched[i]?.node;
+      if (n == null) {
+        if (_hasContent(f) || f.actions.contains('tap')) {
+          findings.add(
+            Finding(
+              rule: 'not-exposed',
+              source: _source,
+              severity: 'error',
+              message: 'Flutter node ${f.id} ${_describe(f)} at ${_format(f.rect)} has no native counterpart',
+              flutterId: f.id,
+              rect: f.rect,
+            ),
+          );
+        }
+        continue;
+      }
+      final (field, nativeName) = n.label.isNotEmpty || n.hint.isEmpty ? ('label', n.label) : ('hint', n.hint);
+      if (normalize(f.name) != normalize(nativeName)) {
+        findings.add(
+          Finding(
+            rule: 'name-mismatch',
+            source: _source,
+            severity: 'warning',
+            message: 'Flutter name "${f.name}" differs from native $field "$nativeName"',
+            flutterId: f.id,
+            nativePath: n.path,
+            rect: f.rect,
+          ),
+        );
+      }
+    }
+
+    for (final n in native.nodes) {
+      if (!n.clickable || n.label.isNotEmpty || n.value.isNotEmpty || n.hint.isNotEmpty) continue;
+      final prefix = '${n.path}.';
+      if (native.nodes.any((d) => d.path.startsWith(prefix) && d.label.isNotEmpty)) continue;
+      findings.add(
+        Finding(
+          rule: 'native-unnamed',
+          source: _source,
+          severity: 'error',
+          message: 'Clickable ${n.nativeType} at ${_format(n.rect)} has no label, value or hint',
+          flutterId: flutterIdByPath[n.path],
+          nativePath: n.path,
+          rect: n.rect,
+        ),
+      );
+    }
+
+    for (final issue in native.issues) {
+      final path = issue.nodePath;
+      findings.add(
+        Finding(
+          rule: issue.check,
+          source: issue.source,
+          severity: issue.severity,
+          message: issue.message,
+          flutterId: path == null ? null : flutterIdByPath[path],
+          nativePath: path,
+          rect: issue.rect,
+        ),
+      );
+    }
+
+    return CheckReport(
+      flutterNodes: flutterNodes,
+      native: native,
+      matches: [
+        for (final (i, m) in matched.indexed)
+          if (m != null) NodeMatch(flutterId: onScreen[i].id, nativePath: m.node.path, by: m.by),
+      ],
+      findings: findings,
+    );
+  }
+
+  /// Lowercase, collapse whitespace, trim, strip trailing `.,;:`.
+  static String normalize(String text) =>
+      text.toLowerCase().replaceAll(RegExp(r'\s+'), ' ').replaceFirst(RegExp(r'[\s.,;:]+$'), '').trim();
+
+  /// The native match of each Flutter node, by index. Identifier matches go first for every node, so a rect
+  /// match cannot take a native node that another Flutter node names by identifier.
+  static List<({NativeNode node, String by})?> _match(List<FlutterNode> flutter, List<NativeNode> native) {
+    final result = List<({NativeNode node, String by})?>.filled(flutter.length, null);
+    final taken = List.filled(native.length, false);
+
+    void take(int i, String by, bool Function(NativeNode) candidate, double minIou) {
+      final f = flutter[i];
+      int? best;
+      var bestIou = -1.0;
+      for (final (j, n) in native.indexed) {
+        if (taken[j] || !candidate(n)) continue;
+        final iou = f.rect.iou(n.rect);
+        if (iou < minIou) continue;
+        if (best == null || iou > bestIou + _sameIou || (iou > bestIou - _sameIou && _preferred(f, n, native[best]))) {
+          best = j;
+          bestIou = iou;
+        }
+      }
+      if (best == null) return;
+      taken[best] = true;
+      result[i] = (node: native[best], by: by);
+    }
+
+    for (final (i, f) in flutter.indexed) {
+      if (f.identifier.isNotEmpty) take(i, NodeMatch.byIdentifier, (n) => n.identifier == f.identifier, 0);
+    }
+    for (var i = 0; i < flutter.length; i++) {
+      if (result[i] == null) take(i, NodeMatch.byRect, (_) => true, iouThreshold);
+    }
+    return result;
+  }
+
+  /// Tie-break between two native nodes with the same IoU: compatible role first, then the deeper node.
+  static bool _preferred(FlutterNode f, NativeNode candidate, NativeNode best) {
+    final compatible = _compatible(f, candidate);
+    if (compatible != _compatible(f, best)) return compatible;
+    return _depth(candidate) > _depth(best);
+  }
+
+  static bool _compatible(FlutterNode f, NativeNode n) =>
+      f.role == n.role ||
+      switch (n.role) {
+        'switch' => f.role == 'toggle',
+        'header' => f.header,
+        // Android reports any clickable view without a better class as a button.
+        'button' => f.actions.contains('tap'),
+        _ => false,
+      };
+
+  static int _depth(NativeNode n) => '.'.allMatches(n.path).length;
+
+  static bool _hasContent(FlutterNode f) => f.name.isNotEmpty || f.value.isNotEmpty || f.hint.isNotEmpty;
+
+  static String _describe(FlutterNode f) {
+    if (f.name.isNotEmpty) return '"${f.name}" (${f.role})';
+    if (f.value.isNotEmpty) return 'value "${f.value}" (${f.role})';
+    if (f.hint.isNotEmpty) return 'hint "${f.hint}" (${f.role})';
+    return '(${f.role})';
+  }
+
+  static String _format(A11yRect r) => '[${[r.left, r.top, r.width, r.height].map(_number).join(', ')}]';
+
+  static String _number(double v) => v == v.roundToDouble() ? v.toInt().toString() : v.toString();
+}
