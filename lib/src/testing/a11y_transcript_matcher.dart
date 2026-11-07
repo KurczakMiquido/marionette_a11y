@@ -32,8 +32,12 @@ class _TranscriptMatcher extends AsyncMatcher {
     }
     if (!file.existsSync()) return 'golden $path not found; run flutter test --update-goldens';
 
-    final expected = file.readAsStringSync();
+    final expected = file.readAsStringSync().replaceAll('\r\n', '\n');
     if (expected == actual) return null;
+    if (expected.trimRight() == actual.trimRight()) {
+      return 'transcript differs from $path only in trailing whitespace or the final newline; '
+          'run flutter test --update-goldens to rewrite it';
+    }
     return 'transcript differs from $path (- expected, + actual):\n${_diff(_lines(expected), _lines(actual))}';
   }
 

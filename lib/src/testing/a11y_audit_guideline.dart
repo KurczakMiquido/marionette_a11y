@@ -7,7 +7,7 @@ import '../a11y_finding.dart';
 import '../a11y_severity.dart';
 import '../a11y_snapshot.dart';
 
-/// Fails when the live semantics tree has findings at or above [failOn].
+/// Fails when the live semantics tree has findings at or above [failOn]; the failure lists all findings.
 ///
 /// Usage: `await expectLater(tester, meetsGuideline(const A11yAuditGuideline()));`
 class A11yAuditGuideline extends AccessibilityGuideline {
@@ -24,10 +24,10 @@ class A11yAuditGuideline extends AccessibilityGuideline {
     if (snapshot.nodes.isEmpty) {
       return const Evaluation.fail('no semantics nodes; call tester.ensureSemantics() first');
     }
-    // The enum is ordered by severity, most severe first.
-    final failing = A11yAudit.run(snapshot).where((finding) => finding.severity.index <= failOn.index);
-    if (failing.isEmpty) return const Evaluation.pass();
-    return Evaluation.fail(failing.map(_line).join('\n'));
+    final findings = A11yAudit.run(snapshot);
+    // The enum is ordered by severity, most severe first. The reason lists every finding, not only the failing ones.
+    if (!findings.any((finding) => finding.severity.index <= failOn.index)) return const Evaluation.pass();
+    return Evaluation.fail(findings.map(_line).join('\n'));
   }
 
   static String _line(A11yFinding finding) {
@@ -36,9 +36,8 @@ class A11yAuditGuideline extends AccessibilityGuideline {
     );
     if (finding.node case final node?) {
       final rect = node.rect;
-      buffer.write(
-        ' — "${node.name}" at [${rect.left.round()}, ${rect.top.round()}, ${rect.width.round()}, ${rect.height.round()}]',
-      );
+      final box = [rect.left, rect.top, rect.width, rect.height].map((v) => v.round()).join(', ');
+      buffer.write(' — "${node.name}" at [$box]');
     }
     return buffer.toString();
   }

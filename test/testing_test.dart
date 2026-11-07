@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:marionette_a11y/marionette_a11y.dart';
+import 'package:marionette_a11y/marionette_a11y.dart' hide A11ySeverity;
 import 'package:marionette_a11y/testing.dart';
 
 Widget _app(Widget body) => MaterialApp(
@@ -54,12 +54,34 @@ void main() {
       handle = tester.ensureSemantics();
       await tester.pumpWidget(_app(ElevatedButton(onPressed: () {}, child: const Text('Kliknij tutaj'))));
       final findings = A11yAudit.run(A11ySnapshot.capture());
+      // A11ySeverity comes from testing.dart alone: the main library is imported with it hidden.
       expect(findings.map((finding) => finding.severity).toSet(), {A11ySeverity.warning});
 
       expect((await const A11yAuditGuideline().evaluate(tester)).passed, isTrue);
       final strict = await const A11yAuditGuideline(failOn: A11ySeverity.warning).evaluate(tester);
       expect(strict.passed, isFalse);
       expect(strict.reason, contains('[warning] generic-name'));
+      handle.dispose();
+    });
+
+    testWidgets('lists every finding, also those below failOn, when it fails', (tester) async {
+      handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        _app(
+          Column(
+            children: [
+              IconButton(onPressed: () {}, icon: const Icon(Icons.delete)),
+              ElevatedButton(onPressed: () {}, child: const Text('Kliknij tutaj')),
+            ],
+          ),
+        ),
+      );
+
+      final result = await const A11yAuditGuideline().evaluate(tester);
+
+      expect(result.passed, isFalse);
+      expect(result.reason, contains('[error] missing-name'));
+      expect(result.reason, contains('[warning] generic-name'));
       handle.dispose();
     });
 
@@ -97,6 +119,26 @@ void main() {
 
       expect(problem, contains('-Zapisz, Link'));
       expect(problem, contains('+Zapisz, Przycisk'));
+      handle.dispose();
+    });
+
+    testWidgets('compares CRLF files as equal to LF output', (tester) async {
+      handle = tester.ensureSemantics();
+      await pumpButton(tester);
+      final file = File('${tmp.path}/crlf.txt')..writeAsStringSync('Zapisz, Przycisk\r\n');
+
+      expect(await matchesA11yTranscript(file.path).matchAsync(tester), isNull);
+      handle.dispose();
+    });
+
+    testWidgets('names a whitespace-only difference instead of printing an empty diff', (tester) async {
+      handle = tester.ensureSemantics();
+      await pumpButton(tester);
+      final file = File('${tmp.path}/ws.txt')..writeAsStringSync('Zapisz, Przycisk\n\n');
+
+      final problem = await matchesA11yTranscript(file.path).matchAsync(tester);
+
+      expect(problem, contains('only in trailing whitespace'));
       handle.dispose();
     });
 
