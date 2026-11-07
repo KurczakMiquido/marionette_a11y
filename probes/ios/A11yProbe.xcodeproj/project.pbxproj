@@ -1,0 +1,164 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A11E00000000000000000101 /* A11yProbeUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A11E00000000000000000201 /* A11yProbeUITests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		A11E00000000000000000201 /* A11yProbeUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = A11yProbeUITests.swift; sourceTree = "<group>"; };
+		A11E00000000000000000202 /* A11yProbeUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = A11yProbeUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		A11E00000000000000000301 = {
+			isa = PBXGroup;
+			children = (
+				A11E00000000000000000302 /* A11yProbeUITests */,
+				A11E00000000000000000303 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A11E00000000000000000302 /* A11yProbeUITests */ = {
+			isa = PBXGroup;
+			children = (
+				A11E00000000000000000201 /* A11yProbeUITests.swift */,
+			);
+			path = A11yProbeUITests;
+			sourceTree = "<group>";
+		};
+		A11E00000000000000000303 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A11E00000000000000000202 /* A11yProbeUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A11E00000000000000000401 /* A11yProbeUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A11E00000000000000000702 /* Build configuration list for PBXNativeTarget "A11yProbeUITests" */;
+			buildPhases = (
+				A11E00000000000000000501 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = A11yProbeUITests;
+			productName = A11yProbeUITests;
+			productReference = A11E00000000000000000202 /* A11yProbeUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A11E00000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = A11E00000000000000000701 /* Build configuration list for PBXProject "A11yProbe" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = A11E00000000000000000301;
+			productRefGroup = A11E00000000000000000303 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A11E00000000000000000401 /* A11yProbeUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A11E00000000000000000501 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A11E00000000000000000101 /* A11yProbeUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		A11E00000000000000000601 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		A11E00000000000000000602 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		A11E00000000000000000603 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.a11y.probe.A11yProbeUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		A11E00000000000000000604 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.a11y.probe.A11yProbeUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A11E00000000000000000701 /* Build configuration list for PBXProject "A11yProbe" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A11E00000000000000000601 /* Debug */,
+				A11E00000000000000000602 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		A11E00000000000000000702 /* Build configuration list for PBXNativeTarget "A11yProbeUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A11E00000000000000000603 /* Debug */,
+				A11E00000000000000000604 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = A11E00000000000000000001 /* Project object */;
+}
