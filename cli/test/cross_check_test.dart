@@ -108,6 +108,7 @@ void main() {
             'message': 'Flutter node 42 "Lipidogram" (text) at [16, 200, 379, 56] has no native counterpart',
             'flutterId': 42,
             'rect': [16.0, 200.0, 379.0, 56.0],
+            'wcag': '4.1.2',
           },
           {
             'rule': 'native-unnamed',
@@ -117,6 +118,7 @@ void main() {
             'flutterId': 45,
             'nativePath': '$android.5.0',
             'rect': [16.0, 256.0, 48.0, 48.0],
+            'wcag': '4.1.2',
           },
         ],
       );
@@ -411,9 +413,10 @@ void main() {
       });
 
       test('a real label difference still fires', () {
-        expect(messages(flutter(1, box, name: 'Save', actions: ['tap']), native('0', box, label: 'Submit')), [
-          'Flutter name "Save" differs from native label "Submit"',
-        ]);
+        expect(
+          messages(flutter(1, box, name: 'Save', actions: ['tap']), native('0', box, label: 'Submit', clickable: true)),
+          ['Flutter name "Save" differs from native label "Submit"'],
+        );
       });
     });
 
@@ -424,9 +427,15 @@ void main() {
       test('the value and hint stay apart from the label', () {
         final slider = flutter(1, box, role: 'slider', name: 'Volume', value: '50%', hint: 'Adjust');
 
-        expect(check(slider, native('0', box, label: 'Volume', value: '50%', focusable: true)).findings, isEmpty);
         expect(
-          check(slider, native('0', box, label: '50%, Volume', focusable: true)).findings.single.message,
+          check(slider, native('0', box, role: 'slider', label: 'Volume', value: '50%', focusable: true)).findings,
+          isEmpty,
+        );
+        expect(
+          check(
+            slider,
+            native('0', box, role: 'slider', label: '50%, Volume', focusable: true),
+          ).findings.single.message,
           'Flutter name "Volume" differs from native label "50%, Volume"',
         );
       });
@@ -569,6 +578,7 @@ void main() {
             'flutterId': 1,
             'nativePath': '0.0',
             'rect': [1.0, 2.0, 3.0, 4.0],
+            'wcag': '2.5.8',
           },
           {'rule': 'SomeNewCheck', 'source': 'atf', 'severity': 'notice', 'message': 'Hm'},
         ],
@@ -606,9 +616,7 @@ void main() {
 
     test('summary prints counts per severity, then one line per finding', () {
       final report = CrossCheck.run(
-        [
-          flutter(1, box, name: 'Save', actions: ['tap']),
-        ],
+        [flutter(1, box, name: 'Save')],
         tree(
           [native('0.0', box, label: 'Submit')],
           issues: const [
@@ -629,6 +637,149 @@ void main() {
 
     test('summary of a clean report has only the counts', () {
       expect(CrossCheck.run([], tree([])).summary(), 'error: 0, warning: 0, info: 0\n');
+    });
+  });
+
+  group('role-mismatch', () {
+    test('fires for a tap node the platform exposes as non-clickable static text', () {
+      final report = CrossCheck.run([
+        flutter(1, box, role: 'text', name: 'Back', actions: ['tap']),
+      ], tree([native('0.0', box, role: 'text', label: 'Back')], platform: 'ios'));
+
+      expect(rules(report), ['role-mismatch']);
+      final f = report.findings.single;
+      expect(f.severity, 'warning');
+      expect(f.source, 'crosscheck');
+      expect(f.flutterId, 1);
+      expect(f.nativePath, '0.0');
+      expect(f.wcag, '4.1.2');
+      expect(
+        f.message,
+        'Flutter text "Back" is a control, but the platform exposes android.view.View "Back" with no control role',
+      );
+    });
+
+    test('fires for a control role without a tap action, native role other', () {
+      final report = CrossCheck.run([
+        flutter(1, box, role: 'slider', name: 'Volume'),
+      ], tree([native('0.0', box, label: 'Volume')]));
+      expect(rules(report), ['role-mismatch']);
+    });
+
+    test('does not fire for a clickable native node', () {
+      final report = CrossCheck.run([
+        flutter(1, box, name: 'Back', actions: ['tap']),
+      ], tree([native('0.0', box, role: 'button', label: 'Back', clickable: true)]));
+      expect(rules(report), isEmpty);
+    });
+
+    test('does not fire for a non-interactive Flutter text', () {
+      final report = CrossCheck.run([
+        flutter(1, box, name: 'Hello'),
+      ], tree([native('0.0', box, role: 'text', label: 'Hello')]));
+      expect(rules(report), isEmpty);
+    });
+
+    test('does not fire for an unmatched node', () {
+      final report = CrossCheck.run([
+        flutter(1, box, role: 'button', name: 'Back', actions: ['tap']),
+      ], tree([native('0.0', far, label: 'Back')]));
+      expect(rules(report), ['not-exposed']);
+    });
+
+    test('does not fire when the native role is a control role', () {
+      final report = CrossCheck.run([
+        flutter(1, box, role: 'toggle', name: 'Wi-Fi', actions: ['tap']),
+      ], tree([native('0.0', box, role: 'switch', label: 'Wi-Fi')]));
+      expect(rules(report), isEmpty);
+    });
+  });
+
+  group('wcag', () {
+    Map<String, String?> wcagByRule(List<NativeIssue> issues) {
+      final report = CrossCheck.run([], tree([], issues: issues));
+      return {for (final f in report.findings) f.rule: f.wcag};
+    }
+
+    NativeIssue issue(String source, String check) =>
+        NativeIssue(source: source, check: check, severity: 'warning', message: 'm');
+
+    test('ATF checks map per the spec table, an unknown check has none', () {
+      expect(
+        wcagByRule([
+          issue('atf', 'TouchTargetSizeCheck'),
+          issue('atf', 'TextContrastCheck'),
+          issue('atf', 'ImageContrastCheck'),
+          issue('atf', 'TextSizeCheck'),
+          issue('atf', 'TraversalOrderCheck'),
+          issue('atf', 'LinkPurposeUnclearCheck'),
+          issue('atf', 'DuplicateSpeakableTextCheck'),
+          issue('atf', 'SpeakableTextPresentCheck'),
+          issue('atf', 'ClassNameCheck'),
+          issue('atf', 'OddCheck'),
+        ]),
+        {
+          'TouchTargetSizeCheck': '2.5.8',
+          'TextContrastCheck': '1.4.3',
+          'ImageContrastCheck': '1.4.11',
+          'TextSizeCheck': '1.4.4',
+          'TraversalOrderCheck': '1.3.2',
+          'LinkPurposeUnclearCheck': '2.4.4',
+          'DuplicateSpeakableTextCheck': '2.4.6',
+          'SpeakableTextPresentCheck': '4.1.2',
+          'ClassNameCheck': '4.1.2',
+          'OddCheck': null,
+        },
+      );
+    });
+
+    test('Apple checks map per the spec table', () {
+      expect(
+        wcagByRule([
+          issue('apple', 'contrast'),
+          issue('apple', 'hitRegion'),
+          issue('apple', 'dynamicType'),
+          issue('apple', 'textClipped'),
+          issue('apple', 'trait'),
+          issue('apple', 'other'),
+        ]),
+        {
+          'contrast': '1.4.3',
+          'hitRegion': '2.5.8',
+          'dynamicType': '1.4.4',
+          'textClipped': '1.4.4',
+          'trait': '4.1.2',
+          'other': null,
+        },
+      );
+    });
+
+    test('a check name from another source gets no wcag', () {
+      expect(wcagByRule([issue('apple', 'TouchTargetSizeCheck')]), {'TouchTargetSizeCheck': null});
+    });
+
+    test('cross-check rules carry 4.1.2', () {
+      final report = CrossCheck.run(
+        [
+          flutter(1, box, name: 'Save', actions: ['tap']),
+          flutter(2, far, name: 'Lost', actions: ['tap']),
+        ],
+        tree([
+          native('0.0', box, role: 'button', label: 'Submit', clickable: true),
+          native('0.1', const A11yRect(0, 300, 10, 10), clickable: true),
+        ]),
+      );
+      expect(rules(report), ['name-mismatch', 'not-exposed', 'native-unnamed']);
+      expect({for (final f in report.findings) f.wcag}, {'4.1.2'});
+    });
+
+    test('Finding.toJson leaves wcag out when null and writes it when set', () {
+      const bare = Finding(rule: 'r', source: 's', severity: 'info', message: 'm');
+      expect(bare.toJson().containsKey('wcag'), isFalse);
+      expect(
+        const Finding(rule: 'r', source: 's', severity: 'info', message: 'm', wcag: '1.4.3').toJson()['wcag'],
+        '1.4.3',
+      );
     });
   });
 }

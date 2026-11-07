@@ -10,6 +10,7 @@ class Finding {
     this.flutterId,
     this.nativePath,
     this.rect,
+    this.wcag,
   });
 
   final String rule;
@@ -22,6 +23,9 @@ class Finding {
   final String? nativePath;
   final A11yRect? rect;
 
+  /// WCAG success criterion number, e.g. `4.1.2`; null when unknown.
+  final String? wcag;
+
   Map<String, dynamic> toJson() => {
     'rule': rule,
     'source': source,
@@ -30,5 +34,6 @@ class Finding {
     'flutterId': ?flutterId,
     'nativePath': ?nativePath,
     'rect': ?rect?.toList(),
+    'wcag': ?wcag,
   };
 }

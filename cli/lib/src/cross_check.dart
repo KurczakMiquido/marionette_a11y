@@ -5,12 +5,15 @@ import 'models/flutter_node.dart';
 import 'models/native_node.dart';
 import 'models/native_tree.dart';
 import 'models/node_match.dart';
+import 'wcag_reference.dart';
 
 /// Joins the Flutter semantics snapshot with the native tree and reports where they disagree.
 class CrossCheck {
   static const iouThreshold = 0.6;
   static const _source = 'crosscheck';
   static const _sameIou = 1e-9;
+  static const _controlRoles = {'button', 'link', 'textField', 'checkbox', 'radio', 'toggle', 'slider'};
+  static const _plainRoles = {'text', 'other', 'image'};
 
   static CheckReport run(List<FlutterNode> flutterNodes, NativeTree native) {
     final onScreen = [
@@ -36,6 +39,7 @@ class CrossCheck {
               message: 'Flutter node ${f.id} ${_describe(f)} at ${_format(f.rect)} has no native counterpart',
               flutterId: f.id,
               rect: f.rect,
+              wcag: WcagReference.crosscheck,
             ),
           );
         }
@@ -52,6 +56,23 @@ class CrossCheck {
             flutterId: f.id,
             nativePath: n.path,
             rect: f.rect,
+            wcag: WcagReference.crosscheck,
+          ),
+        );
+      }
+      if (_isControl(f) && !n.clickable && _plainRoles.contains(n.role)) {
+        findings.add(
+          Finding(
+            rule: 'role-mismatch',
+            source: _source,
+            severity: 'warning',
+            message:
+                'Flutter ${f.role} "${f.name}" is a control, but the platform exposes ${n.nativeType} "${n.label}" '
+                'with no control role',
+            flutterId: f.id,
+            nativePath: n.path,
+            rect: f.rect,
+            wcag: WcagReference.crosscheck,
           ),
         );
       }
@@ -72,6 +93,7 @@ class CrossCheck {
           flutterId: flutterIdByPath[n.path],
           nativePath: n.path,
           rect: n.rect,
+          wcag: WcagReference.crosscheck,
         ),
       );
     }
@@ -87,6 +109,7 @@ class CrossCheck {
           flutterId: path == null ? null : flutterIdByPath[path],
           nativePath: path,
           rect: issue.rect,
+          wcag: WcagReference.forNative(issue.source, issue.check),
         ),
       );
     }
@@ -190,6 +213,8 @@ class CrossCheck {
       };
 
   static int _depth(NativeNode n) => '.'.allMatches(n.path).length;
+
+  static bool _isControl(FlutterNode f) => f.actions.contains('tap') || _controlRoles.contains(f.role);
 
   static bool _hasContent(FlutterNode f) => f.name.isNotEmpty || f.value.isNotEmpty || f.hint.isNotEmpty;
 
