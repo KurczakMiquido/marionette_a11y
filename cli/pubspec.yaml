@@ -1,0 +1,14 @@
+name: a11y_cli
+description: Runs native accessibility probes and cross-checks them against the Flutter semantics snapshot.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+executables:
+  a11y:
+
+dev_dependencies:
+  lints: 6.0.0
+  test: 1.26.3

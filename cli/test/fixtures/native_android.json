@@ -1,0 +1,133 @@
+{
+  "schema": "a11y-native/v1",
+  "platform": "android",
+  "device": "emulator-5580",
+  "app": "dev.poc.marionette_a11y_example",
+  "screen": {
+    "width": 411.4,
+    "height": 914.3,
+    "scale": 2.625
+  },
+  "nodes": [
+    {
+      "path": "0",
+      "nativeType": "android.widget.FrameLayout",
+      "role": "other",
+      "label": "",
+      "value": "",
+      "hint": "",
+      "identifier": "",
+      "rect": [
+        0,
+        0,
+        411.4,
+        914.3
+      ],
+      "focusable": false,
+      "clickable": false,
+      "enabled": true,
+      "selected": false,
+      "checked": null,
+      "heading": false
+    },
+    {
+      "path": "0.0",
+      "nativeType": "android.widget.Button",
+      "role": "button",
+      "label": "Save",
+      "value": "",
+      "hint": "",
+      "identifier": "save_button",
+      "rect": [
+        16,
+        100.5,
+        120,
+        48
+      ],
+      "focusable": true,
+      "clickable": true,
+      "enabled": true,
+      "selected": false,
+      "checked": null,
+      "heading": false
+    },
+    {
+      "path": "0.1",
+      "nativeType": "android.widget.EditText",
+      "role": "textField",
+      "label": "",
+      "value": "",
+      "hint": "Email",
+      "identifier": "email_field",
+      "rect": [
+        16,
+        160,
+        379.4,
+        56
+      ],
+      "focusable": true,
+      "clickable": true,
+      "enabled": true,
+      "selected": false,
+      "checked": null,
+      "heading": false
+    },
+    {
+      "path": "0.2",
+      "nativeType": "android.view.View",
+      "role": "button",
+      "label": "",
+      "value": "",
+      "hint": "",
+      "identifier": "",
+      "rect": [
+        340,
+        20,
+        48,
+        48
+      ],
+      "focusable": true,
+      "clickable": true,
+      "enabled": true,
+      "selected": false,
+      "checked": null,
+      "heading": false
+    },
+    {
+      "path": "0.3",
+      "nativeType": "android.widget.TextView",
+      "role": "header",
+      "label": "Settings",
+      "value": "",
+      "hint": "",
+      "identifier": "",
+      "rect": [
+        16,
+        24,
+        200,
+        32
+      ],
+      "focusable": false,
+      "clickable": false,
+      "enabled": true,
+      "selected": false,
+      "checked": null,
+      "heading": true
+    }
+  ],
+  "issues": [
+    {
+      "source": "atf",
+      "check": "TouchTargetSizeCheck",
+      "severity": "error",
+      "message": "View is too small to touch",
+      "nodePath": "0.2",
+      "rect": [
+        340,
+        20,
+        48,
+        48
+      ]
+    }
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "transcript": [
+    "Save, button",
+    "Email, text field"
+  ],
+  "nodes": [
+    {
+      "id": 1,
+      "role": "header",
+      "name": "Settings",
+      "header": true,
+      "rect": [
+        16,
+        24,
+        200,
+        32
+      ]
+    },
+    {
+      "id": 2,
+      "role": "button",
+      "name": "Save",
+      "identifier": "save_button",
+      "actions": [
+        "tap"
+      ],
+      "rect": [
+        16,
+        100,
+        120,
+        48
+      ]
+    },
+    {
+      "id": 3,
+      "role": "textField",
+      "name": "Email",
+      "value": "a@b.c",
+      "hint": "Enter email",
+      "identifier": "email_field",
+      "enabled": true,
+      "actions": [
+        "tap",
+        "setText"
+      ],
+      "rect": [
+        16,
+        160,
+        361,
+        56
+      ]
+    },
+    {
+      "id": 4,
+      "role": "checkbox",
+      "name": "Agree",
+      "checked": true,
+      "offscreen": true,
+      "rect": [
+        16,
+        900,
+        200,
+        48
+      ]
+    },
+    {
+      "id": 5,
+      "role": "button",
+      "name": "Menu",
+      "expanded": false,
+      "rect": [
+        330,
+        60,
+        44,
+        44
+      ]
+    }
+  ]
+}

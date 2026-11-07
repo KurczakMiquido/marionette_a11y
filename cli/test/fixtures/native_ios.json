@@ -1,0 +1,133 @@
+{
+  "schema": "a11y-native/v1",
+  "platform": "ios",
+  "device": "6F1A2B3C-0000-4000-8000-000000000001",
+  "app": "dev.poc.marionetteA11yExample",
+  "screen": {
+    "width": 393,
+    "height": 852,
+    "scale": 3
+  },
+  "nodes": [
+    {
+      "path": "0",
+      "nativeType": "application",
+      "role": "other",
+      "label": "Example",
+      "value": "",
+      "hint": "",
+      "identifier": "",
+      "rect": [
+        0,
+        0,
+        393,
+        852
+      ],
+      "focusable": true,
+      "clickable": false,
+      "enabled": true,
+      "selected": false,
+      "checked": null,
+      "heading": false
+    },
+    {
+      "path": "0.0",
+      "nativeType": "button",
+      "role": "button",
+      "label": "Save",
+      "value": "",
+      "hint": "",
+      "identifier": "save_button",
+      "rect": [
+        16,
+        100,
+        120,
+        48
+      ],
+      "focusable": true,
+      "clickable": true,
+      "enabled": true,
+      "selected": false,
+      "checked": null,
+      "heading": false
+    },
+    {
+      "path": "0.1",
+      "nativeType": "textField",
+      "role": "textField",
+      "label": "",
+      "value": "",
+      "hint": "Email",
+      "identifier": "email_field",
+      "rect": [
+        16,
+        160,
+        361,
+        56
+      ],
+      "focusable": true,
+      "clickable": true,
+      "enabled": true,
+      "selected": false,
+      "checked": null,
+      "heading": false
+    },
+    {
+      "path": "0.2",
+      "nativeType": "button",
+      "role": "button",
+      "label": "",
+      "value": "",
+      "hint": "",
+      "identifier": "",
+      "rect": [
+        330,
+        60,
+        44,
+        44
+      ],
+      "focusable": true,
+      "clickable": true,
+      "enabled": true,
+      "selected": false,
+      "checked": null,
+      "heading": false
+    },
+    {
+      "path": "0.3",
+      "nativeType": "staticText",
+      "role": "text",
+      "label": "Settings",
+      "value": "",
+      "hint": "",
+      "identifier": "",
+      "rect": [
+        16,
+        64,
+        200,
+        32
+      ],
+      "focusable": true,
+      "clickable": false,
+      "enabled": true,
+      "selected": false,
+      "checked": null,
+      "heading": false
+    }
+  ],
+  "issues": [
+    {
+      "source": "apple",
+      "check": "sufficientElementDescription",
+      "severity": "error",
+      "message": "Element has no description",
+      "nodePath": "0.2",
+      "rect": [
+        330,
+        60,
+        44,
+        44
+      ]
+    }
+  ]
+}
