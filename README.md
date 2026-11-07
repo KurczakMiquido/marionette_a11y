@@ -34,6 +34,14 @@ and every audit passes.
 3. `set_device_config` with text scale 2.0, repeat (WCAG 1.4.4).
 4. After each `tap`, snapshot again: a state change must show up in the transcript.
 
+## Agent skill
+
+[skills/a11y-audit/SKILL.md](skills/a11y-audit/SKILL.md) teaches Claude Code the whole audit of a screen: wiring,
+connecting marionette, `a11y_audit` and `a11y_snapshot`, `a11y check --html` per platform, a typical Flutter fix per
+rule, text scale 2.0, widget tests to guard the fixes and what to report. To use it, copy or symlink the
+`skills/a11y-audit` directory into `~/.claude/skills/` (every project) or `<app>/.claude/skills/` (one app), open
+Claude Code in the app's project, which needs the marionette MCP server, and ask it to audit a screen's accessibility.
+
 ## Widget tests
 
 ```dart
