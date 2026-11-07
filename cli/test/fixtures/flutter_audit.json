@@ -1,0 +1,185 @@
+{
+  "errors": 3,
+  "warnings": 6,
+  "findings": [
+    {
+      "rule": "missing-role",
+      "wcag": "4.1.2",
+      "severity": "warning",
+      "message": "\"Umów wizytę\" reacts to taps but is announced as plain text. Use a button widget.",
+      "node": {
+        "id": 30,
+        "role": "text",
+        "name": "Umów wizytę",
+        "actions": [
+          "tap",
+          "focus"
+        ],
+        "rect": [
+          16.0,
+          40.0,
+          379.0,
+          32.0
+        ]
+      }
+    },
+    {
+      "rule": "target-size-platform",
+      "wcag": "2.5.8",
+      "severity": "warning",
+      "message": "Target is 32 px; Android asks for 48 dp, iOS for 44 pt.",
+      "node": {
+        "id": 30,
+        "role": "text",
+        "name": "Umów wizytę",
+        "actions": [
+          "tap",
+          "focus"
+        ],
+        "rect": [
+          16.0,
+          40.0,
+          379.0,
+          32.0
+        ]
+      }
+    },
+    {
+      "rule": "target-size",
+      "wcag": "2.5.8",
+      "severity": "error",
+      "message": "Target is 16 px on its short side; WCAG 2.2 AA needs 24 unless spacing compensates.",
+      "node": {
+        "id": 34,
+        "role": "button",
+        "name": "Usuń",
+        "tooltip": "Usuń",
+        "actions": [
+          "tap",
+          "focus"
+        ],
+        "rect": [
+          355.0,
+          164.0,
+          16.0,
+          16.0
+        ]
+      }
+    },
+    {
+      "rule": "target-size",
+      "wcag": "2.5.8",
+      "severity": "error",
+      "message": "Target is 16 px on its short side; WCAG 2.2 AA needs 24 unless spacing compensates.",
+      "node": {
+        "id": 36,
+        "role": "button",
+        "name": "Usuń",
+        "tooltip": "Usuń",
+        "actions": [
+          "tap",
+          "focus"
+        ],
+        "rect": [
+          355.0,
+          220.0,
+          16.0,
+          16.0
+        ]
+      }
+    },
+    {
+      "rule": "missing-name",
+      "wcag": "4.1.2",
+      "severity": "error",
+      "message": "Actionable element has no name; a screen reader announces only its role.",
+      "node": {
+        "id": 38,
+        "role": "button",
+        "actions": [
+          "tap",
+          "focus"
+        ],
+        "rect": [
+          16.0,
+          256.0,
+          48.0,
+          48.0
+        ]
+      }
+    },
+    {
+      "rule": "generic-name",
+      "wcag": "2.4.6",
+      "severity": "warning",
+      "message": "Name \"Kliknij tutaj\" says nothing about the purpose.",
+      "node": {
+        "id": 39,
+        "role": "button",
+        "name": "Kliknij tutaj",
+        "actions": [
+          "tap",
+          "focus"
+        ],
+        "rect": [
+          64.0,
+          256.0,
+          95.0,
+          48.0
+        ]
+      }
+    },
+    {
+      "rule": "role-in-name",
+      "wcag": "4.1.2",
+      "severity": "warning",
+      "message": "Name repeats the role the screen reader already announces: \"Przycisk zapisz, Przycisk\".",
+      "node": {
+        "id": 41,
+        "role": "button",
+        "name": "Przycisk zapisz",
+        "actions": [
+          "tap",
+          "focus"
+        ],
+        "rect": [
+          16.0,
+          304.0,
+          379.0,
+          48.0
+        ]
+      }
+    },
+    {
+      "rule": "duplicate-name",
+      "wcag": "2.4.6",
+      "severity": "warning",
+      "message": "2 controls are named \"Usuń\"; a screen reader user cannot tell them apart.",
+      "node": {
+        "id": 34,
+        "role": "button",
+        "name": "Usuń",
+        "tooltip": "Usuń",
+        "actions": [
+          "tap",
+          "focus"
+        ],
+        "rect": [
+          355.0,
+          164.0,
+          16.0,
+          16.0
+        ]
+      }
+    },
+    {
+      "rule": "no-heading",
+      "wcag": "1.3.1",
+      "severity": "warning",
+      "message": "Screen has no heading; screen reader users cannot jump to its sections."
+    }
+  ],
+  "type": "_extensionType",
+  "method": "ext.flutter.a11y.audit",
+  "status": "Success"
+}

@@ -70,7 +70,8 @@ otherwise:
 - iOS: `xcrun simctl spawn <udid> log show --last 10m --style compact --predicate 'eventMessage CONTAINS "Dart VM service"'`.
 
 `native` writes the native tree (`a11y-native/v1`). `check` writes `a11y-check/v1` and prints counts per severity
-plus one line per finding. Formats and rules: [docs/specs/native-probes.md](docs/specs/native-probes.md). Exit code
+plus one line per finding: the in-app audit first, then the cross-check, then the native issues. It also stores the
+screen reader transcript (`--locale pl|en`, default `pl`). Formats and rules: [docs/specs/native-probes.md](docs/specs/native-probes.md). Exit code
 0 when the command ran, whatever it found; 1 on a usage, probe or VM service failure. The first run builds the probe,
 which takes minutes; later runs take seconds.
 

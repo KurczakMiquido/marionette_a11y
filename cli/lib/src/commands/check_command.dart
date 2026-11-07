@@ -5,7 +5,9 @@ import 'probe_command.dart';
 /// `a11y check`: cross-checks the native tree against the Flutter semantics snapshot.
 class CheckCommand extends ProbeCommand {
   CheckCommand(super.out, super.err) {
-    argParser.addOption('vm-service', mandatory: true, help: 'VM service URI of the running app (ws:// or http://).');
+    argParser
+      ..addOption('vm-service', mandatory: true, help: 'VM service URI of the running app (ws:// or http://).')
+      ..addOption('locale', allowed: ['pl', 'en'], defaultsTo: 'pl', help: 'Language of the transcript.');
   }
 
   @override
@@ -21,7 +23,11 @@ class CheckCommand extends ProbeCommand {
     final client = await FlutterSnapshotClient.connect(argResults!.option('vm-service')!);
     try {
       final native = await runProbe();
-      final report = CrossCheck.run(await client.snapshot(), native);
+      final snapshot = await client.snapshot(locale: argResults!.option('locale')!);
+      final report = CrossCheck.run(
+        snapshot.nodes,
+        native,
+      ).withFlutter(flutterFindings: await client.audit(), transcript: snapshot.transcript);
       writeJson(report.toJson());
       out.write(report.summary());
       err.writeln('Wrote $outPath');

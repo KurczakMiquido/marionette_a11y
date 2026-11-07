@@ -608,10 +608,21 @@ void main() {
       expect(json['schema'], 'a11y-check/v1');
       expect(json['platform'], 'android');
       expect(json['app'], 'dev.poc.marionette_a11y_example');
-      expect(json['flutter'], {'nodes': snapshot['nodes']});
+      expect(json['flutter'], {'nodes': snapshot['nodes'], 'transcript': <String>[]});
       expect(json['native'], nativeJson);
       expect(json['matches'], hasLength(5));
       expect(json['findings'], hasLength(5));
+    });
+
+    test('withFlutter puts the in-app findings first and carries the transcript', () {
+      final report = CrossCheck.run([flutter(1, box, name: 'Save')], tree([native('0.0', box, label: 'Submit')]));
+      const audit = Finding(rule: 'no-heading', source: 'flutter', severity: 'info', message: 'm', wcag: '2.4.6');
+
+      final joined = report.withFlutter(flutterFindings: [audit], transcript: ['Save']);
+
+      expect([for (final f in joined.findings) f.source], ['flutter', 'crosscheck']);
+      expect((joined.toJson()['flutter'] as Map)['transcript'], ['Save']);
+      expect(report.findings, hasLength(1), reason: 'the cross-check result itself is not modified');
     });
 
     test('summary prints counts per severity, then one line per finding', () {

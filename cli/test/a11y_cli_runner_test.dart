@@ -100,13 +100,51 @@ void main() {
       final report = jsonDecode(File(outFile).readAsStringSync()) as Map<String, dynamic>;
       expect(report['schema'], 'a11y-check/v1');
       expect(report['native'], fixture('native_android'));
-      expect(report['flutter'], {'nodes': fixture('flutter_snapshot')['nodes']});
+      expect(report['flutter'], {
+        'nodes': fixture('flutter_snapshot')['nodes'],
+        'transcript': fixture('flutter_snapshot')['transcript'],
+      });
       expect(report['matches'], hasLength(5));
+      final sources = [for (final f in report['findings'] as List) (f as Map)['source']];
+      expect(sources.take(9), everyElement('flutter'));
+      expect(sources.skip(9), isNot(contains('flutter')));
+      expect(sources.skip(9).first, 'crosscheck');
+      expect(sources.last, 'atf');
       expect(
         out.toString(),
-        startsWith('error: 4, warning: 1, info: 0\n[error] not-exposed — Flutter node 42 "Lipidogram"'),
+        startsWith('error: 7, warning: 7, info: 0\n[warning] missing-role — "Umów wizytę" reacts to taps'),
       );
-      expect(out.toString().trim().split('\n'), hasLength(6));
+      expect(out.toString(), contains('[error] not-exposed — Flutter node 42 "Lipidogram"'));
+      expect(out.toString().trim().split('\n'), hasLength(15));
+    });
+
+    test('--locale reaches the snapshot call; the default is pl', () async {
+      final probes = await fixtureProbes('native_android');
+      Future<List<dynamic>> transcript(List<String> extra) async {
+        final outFile = '${tmp.path}/check${extra.length}.json';
+        final code = await run([
+          'check',
+          ...['--platform', 'android', '--device', 'emulator-5580', '--app', androidApp, '--out', outFile],
+          ...['--vm-service', await startFakeApp(), '--probes-dir', probes.path, ...extra],
+        ]);
+        expect(code, 0, reason: err.toString());
+        final report = jsonDecode(File(outFile).readAsStringSync()) as Map<String, dynamic>;
+        return (report['flutter'] as Map)['transcript'] as List;
+      }
+
+      expect(await transcript([]), fixture('flutter_snapshot')['transcript']);
+      expect(await transcript(['--locale', 'en']), everyElement(endsWith(' [en]')));
+    });
+
+    test('an unknown --locale exits 1', () async {
+      final code = await run([
+        'check',
+        ...['--platform', 'android', '--device', 'd', '--app', 'a', '--out', 'x.json'],
+        ...['--vm-service', 'ws://127.0.0.1:9/x/ws', '--locale', 'de'],
+      ]);
+
+      expect(code, 1);
+      expect(err.toString(), contains('"de" is not an allowed value'));
     });
 
     test('an unreachable VM service exits 1 before running the probe', () async {

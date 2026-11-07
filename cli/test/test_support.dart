@@ -28,11 +28,13 @@ List<String> recordedArgs(Directory probes, {String platform = 'android'}) =>
     File('${probes.path}/$platform/args.txt').readAsLinesSync();
 
 /// Starts `fake_app.dart` and returns its VM service WebSocket URI. Killed after the test.
-Future<String> startFakeApp({bool withExtension = true}) async {
+Future<String> startFakeApp({bool withExtension = true, bool hangAudit = false}) async {
   final process = await Process.start(Platform.resolvedExecutable, [
     'test/fixtures/fake_app.dart',
     fixturePath('flutter_snapshot'),
+    fixturePath('flutter_audit'),
     if (!withExtension) '--no-extension',
+    if (hangAudit) '--hang-audit',
   ]);
   addTearDown(() async {
     process.kill();
