@@ -34,6 +34,20 @@ and every audit passes.
 3. `set_device_config` with text scale 2.0, repeat (WCAG 1.4.4).
 4. After each `tap`, snapshot again: a state change must show up in the transcript.
 
+## Widget tests
+
+```dart
+import 'package:marionette_a11y/testing.dart';
+
+final handle = tester.ensureSemantics();
+await expectLater(tester, meetsGuideline(const A11yAuditGuideline()));
+await expectLater(tester, matchesA11yTranscript('goldens/booking.txt'));
+```
+
+`A11yAuditGuideline(failOn: A11ySeverity.warning)` also fails on warnings. The transcript golden is a text file, one
+announcement per line, resolved like `matchesGoldenFile`; `flutter test --update-goldens` writes it. Add
+`marionette_a11y` as a dev dependency. For contrast use flutter_test's `textContrastGuideline`.
+
 ## Limits
 
 - Rules cover a fraction of WCAG. A hint-only `TextField` is invisible here: Flutter puts `hintText` into the label.

@@ -12,11 +12,12 @@ dependencies:
   collection: 1.19.1
   flutter:
     sdk: flutter
-  marionette_flutter: 0.6.0
-
-dev_dependencies:
   flutter_test:
     sdk: flutter
+  marionette_flutter: 0.6.0
+  matcher: 0.12.19
+
+dev_dependencies:
   flutter_lints: ^6.0.0
 
 # For information on the generic Dart part of this file, see the

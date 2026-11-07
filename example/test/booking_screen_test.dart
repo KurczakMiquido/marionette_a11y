@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:marionette_a11y/marionette_a11y.dart';
+import 'package:marionette_a11y/testing.dart';
 import 'package:marionette_a11y_example/booking_screen.dart';
 
 Future<A11ySnapshot> _capture(WidgetTester tester, {required bool accessible}) async {
@@ -44,6 +45,26 @@ void main() {
       'Przeczytaj regulamin, Przycisk',
       'Zapisz, Przycisk',
     ]);
+    handle.dispose();
+  });
+
+  testWidgets('fixed version meets the audit guideline and matches its transcript golden', (tester) async {
+    final handle = tester.ensureSemantics();
+    await tester.pumpWidget(const MaterialApp(home: BookingScreen(accessible: true)));
+
+    await expectLater(tester, meetsGuideline(const A11yAuditGuideline()));
+    await expectLater(tester, matchesA11yTranscript('goldens/booking_fixed.txt'));
+    handle.dispose();
+  });
+
+  testWidgets('broken version fails the audit guideline and matches its transcript golden', (tester) async {
+    final handle = tester.ensureSemantics();
+    await tester.pumpWidget(const MaterialApp(home: BookingScreen(accessible: false)));
+
+    final result = await const A11yAuditGuideline().evaluate(tester);
+    expect(result.passed, isFalse);
+    expect(result.reason, contains('missing-name'));
+    await expectLater(tester, matchesA11yTranscript('goldens/booking_broken.txt'));
     handle.dispose();
   });
 }
