@@ -14,7 +14,6 @@ class CheckReport {
   });
 
   static const schema = 'a11y-check/v1';
-  static const _knownSeverities = ['error', 'warning', 'info'];
 
   final List<FlutterNode> flutterNodes;
   final NativeTree native;
@@ -48,7 +47,7 @@ class CheckReport {
 
   /// Counts per severity, then one `[severity] rule — message` line per finding.
   String summary() {
-    final counts = {for (final s in _knownSeverities) s: 0};
+    final counts = {for (final s in Finding.severities) s: 0};
     for (final f in findings) {
       counts[f.severity] = (counts[f.severity] ?? 0) + 1;
     }

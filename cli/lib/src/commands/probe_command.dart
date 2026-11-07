@@ -54,11 +54,14 @@ abstract class ProbeCommand extends Command<int> {
     return probe.run();
   }
 
-  void writeJson(Map<String, dynamic> json) {
+  void writeJson(Map<String, dynamic> json) =>
+      writeText(outPath, '${const JsonEncoder.withIndent('  ').convert(json)}\n');
+
+  void writeText(String path, String text) {
     try {
-      File(outPath).writeAsStringSync('${const JsonEncoder.withIndent('  ').convert(json)}\n');
+      File(path).writeAsStringSync(text);
     } on FileSystemException catch (e) {
-      throw CliFailure('cannot write $outPath: ${e.osError?.message ?? e.message}');
+      throw CliFailure('cannot write $path: ${e.osError?.message ?? e.message}');
     }
   }
 }

@@ -13,6 +13,9 @@ class Finding {
     this.wcag,
   });
 
+  /// The severities a finding can have, worst first.
+  static const severities = ['error', 'warning', 'info'];
+
   final String rule;
 
   /// `crosscheck`, or the native issue's source (`atf`, `apple`).

@@ -20,7 +20,11 @@ void main() {
     addTearDown(() => tmp.delete(recursive: true));
   });
 
-  Future<int> run(List<String> args) => A11yCliRunner(out: out, err: err).run(args);
+  Future<int> run(List<String> args, {String adb = 'adb'}) => A11yCliRunner(
+    out: out,
+    err: err,
+    screenshotter: (platform, device) => Screenshotter(platform: platform, device: device, adb: adb),
+  ).run(args);
 
   group('usage', () {
     test('no command exits 1 with usage', () async {
@@ -159,6 +163,93 @@ void main() {
       expect(code, 1);
       expect(err.toString(), contains('VM service'));
       expect(File('${probes.path}/android/args.txt').existsSync(), isFalse);
+    });
+  });
+
+  group('check --html', () {
+    late Directory probes;
+    late String jsonFile;
+    late String htmlFile;
+
+    setUp(() async {
+      probes = await fixtureProbes('native_android');
+      jsonFile = '${tmp.path}/check.json';
+      htmlFile = '${tmp.path}/check.html';
+    });
+
+    Future<int> check(String adb, {bool html = true, String? vmService}) async => run([
+      'check',
+      ...['--platform', 'android', '--device', 'emulator-5580', '--app', androidApp, '--out', jsonFile],
+      ...['--vm-service', vmService ?? await startFakeApp(), '--probes-dir', probes.path],
+      if (html) ...['--html', htmlFile],
+    ], adb: adb);
+
+    test('writes the JSON and an HTML report with the screenshot, and exits 0', () async {
+      final png = fakePng(1080, 2400);
+      final adb = await fakeTool('adb', 'cat "${await tempFile(png)}"');
+
+      expect(await check(adb), 0, reason: err.toString());
+
+      expect(toolArgs(adb), ['-s', 'emulator-5580', 'exec-out', 'screencap', '-p']);
+      expect(File(jsonFile).existsSync(), isTrue);
+      final html = File(htmlFile).readAsStringSync();
+      expect(html, contains('data:image/png;base64,${base64Encode(png)}'));
+      expect(html, contains('id="g1"'));
+      expect(html, contains('<h3>Whole screen</h3>'), reason: 'the fixture audit has a screen-level finding');
+      expect(err.toString(), isNot(contains('a11y:')));
+      expect(err.toString(), contains('Wrote $htmlFile'));
+      expect(out.toString(), startsWith('error: 7, warning: 7, info: 0\n'));
+    });
+
+    test('a failed screenshot is reported and the report is written without one', () async {
+      final adb = await fakeTool('adb', 'echo "adb: device \'emulator-5580\' not found" >&2; exit 1');
+
+      expect(await check(adb), 0, reason: err.toString());
+
+      expect(err.toString(), contains("a11y: no screenshot: adb: device 'emulator-5580' not found\n"));
+      final html = File(htmlFile).readAsStringSync();
+      expect(html, isNot(contains('<img')));
+      expect(html, contains('aspect-ratio:411.4 / 914.3'));
+      expect(File(jsonFile).existsSync(), isTrue);
+    });
+
+    test('warns when the screenshot does not cover the screen at its scale', () async {
+      final adb = await fakeTool('adb', 'cat "${await tempFile(fakePng(540, 1200))}"');
+
+      expect(await check(adb), 0, reason: err.toString());
+
+      expect(
+        err.toString(),
+        contains(
+          'a11y: screenshot is 540x1200 px but the screen is 411.4x914.3 pt at scale 2.625; boxes may not align\n',
+        ),
+      );
+      expect(File(htmlFile).readAsStringSync(), contains('data:image/png;base64,'));
+    });
+
+    test('the screenshot is taken after connecting and before the probe runs', () async {
+      final log = '${tmp.path}/order.log';
+      probes = await fakeProbes('echo probe >> "$log"; cp "${fixturePath('native_android')}" "\$3"');
+      final adb = await fakeTool('adb', 'echo screenshot >> "$log"; cat "${await tempFile(fakePng(1080, 2400))}"');
+
+      expect(await check(adb), 0, reason: err.toString());
+      expect(File(log).readAsLinesSync(), ['screenshot', 'probe']);
+    });
+
+    test('an unreachable VM service fails before the screenshot', () async {
+      final adb = await fakeTool('adb', 'true');
+
+      expect(await check(adb, vmService: 'ws://127.0.0.1:9/nothing/ws'), 1);
+      expect(toolArgs(adb), isNull);
+      expect(File(htmlFile).existsSync(), isFalse);
+    });
+
+    test('without --html no screenshot is taken', () async {
+      final adb = await fakeTool('adb', 'true');
+
+      expect(await check(adb, html: false), 0, reason: err.toString());
+      expect(toolArgs(adb), isNull);
+      expect(File(htmlFile).existsSync(), isFalse);
     });
   });
 }
