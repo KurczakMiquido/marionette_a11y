@@ -1,78 +1,108 @@
 {
   "transcript": [
-    "Save, button",
-    "Email, text field"
+    "Umów wizytę",
+    "E-mail, Pole edycji",
+    "Morfologia",
+    "Usuń, Przycisk",
+    "Lipidogram",
+    "Przycisk"
   ],
   "nodes": [
     {
-      "id": 1,
-      "role": "header",
-      "name": "Settings",
-      "header": true,
-      "rect": [
-        16,
-        24,
-        200,
-        32
-      ]
-    },
-    {
-      "id": 2,
-      "role": "button",
-      "name": "Save",
-      "identifier": "save_button",
-      "actions": [
-        "tap"
-      ],
-      "rect": [
-        16,
-        100,
-        120,
-        48
-      ]
-    },
-    {
-      "id": 3,
-      "role": "textField",
-      "name": "Email",
-      "value": "a@b.c",
-      "hint": "Enter email",
-      "identifier": "email_field",
-      "enabled": true,
+      "id": 37,
+      "role": "text",
+      "name": "Umów wizytę",
       "actions": [
         "tap",
-        "setText"
+        "focus"
       ],
       "rect": [
-        16,
-        160,
-        361,
-        56
+        16.0,
+        40.0,
+        379.0,
+        32.0
       ]
     },
     {
-      "id": 4,
-      "role": "checkbox",
-      "name": "Agree",
-      "checked": true,
-      "offscreen": true,
+      "id": 39,
+      "role": "textField",
+      "name": "E-mail",
+      "identifier": "email",
+      "actions": [
+        "tap",
+        "focus"
+      ],
       "rect": [
-        16,
-        900,
-        200,
-        48
+        16.0,
+        88.0,
+        379.0,
+        56.0
       ]
     },
     {
-      "id": 5,
+      "id": 40,
+      "role": "text",
+      "name": "Morfologia",
+      "selected": false,
+      "rect": [
+        16.0,
+        144.0,
+        379.0,
+        56.0
+      ]
+    },
+    {
+      "id": 41,
       "role": "button",
-      "name": "Menu",
-      "expanded": false,
+      "name": "Usuń",
+      "actions": [
+        "tap",
+        "focus"
+      ],
       "rect": [
-        330,
-        60,
-        44,
-        44
+        355.0,
+        164.0,
+        16.0,
+        16.0
+      ]
+    },
+    {
+      "id": 42,
+      "role": "text",
+      "name": "Lipidogram",
+      "selected": false,
+      "rect": [
+        16.0,
+        200.0,
+        379.0,
+        56.0
+      ]
+    },
+    {
+      "id": 45,
+      "role": "button",
+      "actions": [
+        "tap",
+        "focus"
+      ],
+      "rect": [
+        16.0,
+        256.0,
+        48.0,
+        48.0
+      ]
+    },
+    {
+      "id": 50,
+      "role": "checkbox",
+      "name": "Zgoda",
+      "offscreen": true,
+      "checked": false,
+      "rect": [
+        16.0,
+        960.0,
+        379.0,
+        48.0
       ]
     }
   ]

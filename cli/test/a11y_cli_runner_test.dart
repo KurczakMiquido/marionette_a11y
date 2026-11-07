@@ -6,6 +6,8 @@ import 'package:test/test.dart';
 
 import 'test_support.dart';
 
+const androidApp = 'dev.poc.marionette_a11y_example';
+
 void main() {
   late StringBuffer out;
   late StringBuffer err;
@@ -58,14 +60,14 @@ void main() {
 
       final code = await run([
         'native',
-        ...['--platform', 'android', '--device', 'emulator-5580', '--app', 'dev.app'],
+        ...['--platform', 'android', '--device', 'emulator-5580', '--app', androidApp],
         ...['--out', outFile, '--probes-dir', probes.path],
       ]);
 
       expect(code, 0, reason: err.toString());
       expect(jsonDecode(File(outFile).readAsStringSync()), fixture('native_android'));
-      expect(recordedArgs(probes).take(2), ['emulator-5580', 'dev.app']);
-      expect(out.toString(), contains('5 nodes and 1 issue'));
+      expect(recordedArgs(probes).take(2), ['emulator-5580', androidApp]);
+      expect(out.toString(), contains('8 nodes and 3 issues'));
     });
 
     test('a probe failure exits 1 with its reason and writes nothing', () async {
@@ -90,7 +92,7 @@ void main() {
 
       final code = await run([
         'check',
-        ...['--platform', 'android', '--device', 'emulator-5580', '--app', 'dev.app', '--out', outFile],
+        ...['--platform', 'android', '--device', 'emulator-5580', '--app', androidApp, '--out', outFile],
         ...['--vm-service', await startFakeApp(), '--probes-dir', probes.path],
       ]);
 
@@ -99,9 +101,12 @@ void main() {
       expect(report['schema'], 'a11y-check/v1');
       expect(report['native'], fixture('native_android'));
       expect(report['flutter'], {'nodes': fixture('flutter_snapshot')['nodes']});
-      expect(report['matches'], hasLength(3));
-      expect(out.toString(), startsWith('error: 3, warning: 0, info: 0\n[error] not-exposed — Flutter node 5 "Menu"'));
-      expect(out.toString().trim().split('\n'), hasLength(4));
+      expect(report['matches'], hasLength(5));
+      expect(
+        out.toString(),
+        startsWith('error: 4, warning: 1, info: 0\n[error] not-exposed — Flutter node 42 "Lipidogram"'),
+      );
+      expect(out.toString().trim().split('\n'), hasLength(6));
     });
 
     test('an unreachable VM service exits 1 before running the probe', () async {

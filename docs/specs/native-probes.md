@@ -87,7 +87,8 @@ All strings are present (empty when missing). Rect numbers are rounded to one de
 | `nodePath` | string or null | `path` of the node it refers to, when it can be resolved |
 | `rect` | [l, t, w, h] or null | logical points |
 
-ATF results of type `NOT_RUN` and `RESOLVED` are dropped.
+ATF results of type `NOT_RUN` and `RESOLVED` are dropped. `nodePath` and `rect` are always present, `null` when
+unknown.
 
 ## Flutter snapshot
 
@@ -117,16 +118,28 @@ Matching, per on-screen Flutter node, in Flutter traversal order:
 
 Each native node matches at most one Flutter node.
 
-Finding: `{ rule, source, severity, message, flutterId?, nativePath?, rect? }`.
+Finding: `{ rule, source, severity, message, flutterId?, nativePath?, rect? }`. Absent optional keys are left out,
+not written as `null`.
 
 | rule | source | severity | when |
 |---|---|---|---|
 | `not-exposed` | `crosscheck` | error | Flutter node has a name, value or hint, or a `tap` action, and has no native match |
-| `name-mismatch` | `crosscheck` | warning | matched, and normalized Flutter `name` differs from normalized native `label`, falling back to `hint` when `label` is empty |
-| `native-unnamed` | `crosscheck` | error | native node is `clickable`, its `label`, `value` and `hint` are empty, and no descendant (path prefix) has a label |
+| `name-mismatch` | `crosscheck` | warning | matched, and the normalized Flutter text differs from the normalized native text the platform builds from it, see below |
+| `native-unnamed` | `crosscheck` | error | native node is `clickable`, has a non-empty rect, its `label`, `value` and `hint` are empty, and no descendant (path prefix) has a label |
 | `<check>` | `atf` / `apple` | issue severity | every NativeIssue, passed through |
 
-Normalize: lowercase, collapse whitespace, trim, strip trailing `.,;:`.
+`name-mismatch` compares what the screen reader receives, which differs per platform (Flutter 3.44 engine):
+
+- iOS keeps label, value and hint apart (`SemanticsObject.mm`). Flutter `name` is compared with native `label`, or
+  with native `hint` when `label` is empty.
+- Android joins them (`AccessibilityBridge.java`). A node's content description is its value, label and hint, the
+  non-empty ones joined with `", "`; a text field's `hintText` is its label and hint joined the same way, its value
+  stays apart; a route scope (`scopesRoute`) gets neither and is not focusable. So native `label` is compared with
+  Flutter `value`, `name`, `hint` joined that way, and for a Flutter `textField` native `hint` with `name`, `hint`.
+  A native node that is not focusable and has an empty `label` and `hint` is skipped.
+
+Normalize: lowercase, collapse each whitespace run to one space, strip a trailing run of whitespace and `.,;:`
+(`[\s.,;:]+$`), trim.
 
 ## CLI
 

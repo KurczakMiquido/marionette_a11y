@@ -13,7 +13,7 @@ void main() {
       final json = fixture(name);
       final tree = NativeTree.fromJson(json);
       expect(tree.nodes, isNotEmpty);
-      expect(tree.issues, hasLength(1));
+      expect(tree.issues, isNotEmpty);
       expect(jsonDecode(jsonEncode(tree.toJson())), json);
     });
   }
@@ -22,12 +22,22 @@ void main() {
     final tree = NativeTree.fromJson(fixture('native_android'));
     expect(tree.platform, 'android');
     expect(tree.screen.scale, 2.625);
-    final field = tree.nodes[2];
-    expect(field.role, 'textField');
-    expect(field.hint, 'Email');
+    final field = tree.nodes.singleWhere((n) => n.role == 'textField');
+    expect(field.nativeType, 'android.widget.EditText');
+    expect(field.label, '');
+    expect(field.hint, 'E-mail');
     expect(field.checked, isNull);
+    expect(field.heading, isFalse);
     expect(field.rect.width, 379.4);
-    expect(tree.issues.single.nodePath, '0.2');
+    expect(tree.issues.first.nodePath, '0.0.0.0.0.0.0.0.5.0');
+  });
+
+  test('ios fixture has no checked or heading state', () {
+    final tree = NativeTree.fromJson(fixture('native_ios'));
+    expect(tree.platform, 'ios');
+    expect(tree.screen.scale, 3);
+    expect({for (final n in tree.nodes) (n.checked, n.heading)}, {(null, null)});
+    expect(tree.nodes.singleWhere((n) => n.role == 'textField').label, 'E-mail');
   });
 
   test('issue with null nodePath and rect round-trips', () {

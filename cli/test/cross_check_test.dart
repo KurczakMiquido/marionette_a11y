@@ -5,8 +5,8 @@ import 'package:test/test.dart';
 
 import 'test_support.dart';
 
-List<FlutterNode> fixtureFlutterNodes() => [
-  for (final raw in fixture('flutter_snapshot')['nodes'] as List) FlutterNode.fromJson(raw as Map<String, dynamic>),
+List<FlutterNode> fixtureFlutterNodes([String name = 'flutter_snapshot']) => [
+  for (final raw in fixture(name)['nodes'] as List) FlutterNode.fromJson(raw as Map<String, dynamic>),
 ];
 
 FlutterNode flutter(
@@ -42,6 +42,7 @@ NativeNode native(
   String hint = '',
   String identifier = '',
   bool clickable = false,
+  bool? focusable,
 }) => NativeNode(
   path: path,
   nativeType: 'android.view.View',
@@ -51,7 +52,7 @@ NativeNode native(
   hint: hint,
   identifier: identifier,
   rect: rect,
-  focusable: clickable,
+  focusable: focusable ?? clickable,
   clickable: clickable,
   enabled: true,
   selected: false,
@@ -59,14 +60,15 @@ NativeNode native(
   heading: false,
 );
 
-NativeTree tree(List<NativeNode> nodes, {List<NativeIssue> issues = const []}) => NativeTree(
-  platform: 'android',
-  device: 'emulator-5580',
-  app: 'dev.example',
-  screen: const NativeScreen(width: 400, height: 800, scale: 2),
-  nodes: nodes,
-  issues: issues,
-);
+NativeTree tree(List<NativeNode> nodes, {List<NativeIssue> issues = const [], String platform = 'android'}) =>
+    NativeTree(
+      platform: platform,
+      device: 'emulator-5580',
+      app: 'dev.example',
+      screen: const NativeScreen(width: 400, height: 800, scale: 2),
+      nodes: nodes,
+      issues: issues,
+    );
 
 const box = A11yRect(0, 0, 100, 100);
 const far = A11yRect(300, 600, 50, 50);
@@ -77,61 +79,79 @@ Map<int, String> matchedPaths(CheckReport report) => {for (final m in report.mat
 
 void main() {
   group('fixtures', () {
-    test('android: identifier and rect matches, unmatched Menu, unnamed clickable, ATF issue', () {
+    // Booking screen with mistakes, read on emulator-5580 and the iOS simulator, trimmed.
+    const android = '0.0.0.0.0.0.0.0';
+    const ios = '0.0.0.0.0.0.1.1.1.1.1';
+
+    test('android: identifier and rect matches, a node missing natively, unnamed clickable, ATF issues', () {
       final report = CrossCheck.run(fixtureFlutterNodes(), NativeTree.fromJson(fixture('native_android')));
 
       expect(
         [for (final m in report.matches) m.toJson()],
         [
-          {'flutterId': 1, 'nativePath': '0.3', 'by': 'rect'},
-          {'flutterId': 2, 'nativePath': '0.0', 'by': 'identifier'},
-          {'flutterId': 3, 'nativePath': '0.1', 'by': 'identifier'},
+          {'flutterId': 37, 'nativePath': '$android.0', 'by': 'rect'},
+          {'flutterId': 39, 'nativePath': '$android.2', 'by': 'identifier'},
+          {'flutterId': 40, 'nativePath': '$android.3', 'by': 'rect'},
+          {'flutterId': 41, 'nativePath': '$android.3.0', 'by': 'rect'},
+          {'flutterId': 45, 'nativePath': '$android.5.0', 'by': 'rect'},
         ],
       );
       expect(
-        [for (final f in report.findings) f.toJson()],
+        [for (final f in report.findings.take(2)) f.toJson()],
         [
           {
             'rule': 'not-exposed',
             'source': 'crosscheck',
             'severity': 'error',
-            'message': 'Flutter node 5 "Menu" (button) at [330, 60, 44, 44] has no native counterpart',
-            'flutterId': 5,
-            'rect': [330.0, 60.0, 44.0, 44.0],
+            'message': 'Flutter node 42 "Lipidogram" (text) at [16, 200, 379, 56] has no native counterpart',
+            'flutterId': 42,
+            'rect': [16.0, 200.0, 379.0, 56.0],
           },
           {
             'rule': 'native-unnamed',
             'source': 'crosscheck',
             'severity': 'error',
-            'message': 'Clickable android.view.View at [340, 20, 48, 48] has no label, value or hint',
-            'nativePath': '0.2',
-            'rect': [340.0, 20.0, 48.0, 48.0],
+            'message': 'Clickable android.widget.Button at [16, 256, 48, 48] has no label, value or hint',
+            'flutterId': 45,
+            'nativePath': '$android.5.0',
+            'rect': [16.0, 256.0, 48.0, 48.0],
           },
-          {
-            'rule': 'TouchTargetSizeCheck',
-            'source': 'atf',
-            'severity': 'error',
-            'message': 'View is too small to touch',
-            'nativePath': '0.2',
-            'rect': [340.0, 20.0, 48.0, 48.0],
-          },
+        ],
+      );
+      expect(
+        [for (final f in report.findings.skip(2)) (f.rule, f.source, f.severity, f.flutterId, f.nativePath)],
+        [
+          ('SpeakableTextPresentCheck', 'atf', 'error', 45, '$android.5.0'),
+          ('TouchTargetSizeCheck', 'atf', 'error', 41, '$android.3.0'),
+          ('TextContrastCheck', 'atf', 'warning', 39, '$android.2'),
         ],
       );
     });
 
-    test('ios: shifted title is not exposed, unnamed Menu button is a name mismatch', () {
-      final report = CrossCheck.run(fixtureFlutterNodes(), NativeTree.fromJson(fixture('native_ios')));
+    test('ios: shifted title is not exposed, a name that does not reach VoiceOver, Apple issues', () {
+      final report = CrossCheck.run(
+        fixtureFlutterNodes('flutter_snapshot_ios'),
+        NativeTree.fromJson(fixture('native_ios')),
+      );
 
-      expect(matchedPaths(report), {2: '0.0', 3: '0.1', 5: '0.2'});
-      expect(rules(report), ['not-exposed', 'name-mismatch', 'native-unnamed', 'sufficientElementDescription']);
+      expect(matchedPaths(report), {38: '$ios.3', 39: '$ios.4.0', 40: '$ios.4.1', 44: '$ios.6.1'});
+      expect(rules(report), [
+        'not-exposed',
+        'name-mismatch',
+        'native-unnamed',
+        'hitRegion',
+        'sufficientElementDescription',
+      ]);
+      expect(report.findings.first.flutterId, 36);
       final mismatch = report.findings[1];
-      expect(mismatch.flutterId, 5);
-      expect(mismatch.nativePath, '0.2');
+      expect(mismatch.flutterId, 44);
+      expect(mismatch.nativePath, '$ios.6.1');
       expect(mismatch.severity, 'warning');
-      expect(mismatch.message, 'Flutter name "Menu" differs from native label ""');
-      final apple = report.findings[3];
-      expect(apple.source, 'apple');
-      expect(apple.flutterId, 5, reason: 'issue node 0.2 is matched to Flutter node 5');
+      expect(mismatch.message, 'Flutter name "Kalendarz" differs from native label ""');
+      expect(
+        [for (final f in report.findings.skip(2)) (f.source, f.flutterId)],
+        [('crosscheck', 44), ('apple', 40), ('apple', 44)],
+      );
     });
   });
 
@@ -290,39 +310,117 @@ void main() {
   });
 
   group('name-mismatch', () {
-    CheckReport check(String flutterName, {String label = '', String hint = ''}) =>
-        CrossCheck.run([flutter(1, box, name: flutterName)], tree([native('0.0', box, label: label, hint: hint)]));
+    for (final platform in ['android', 'ios']) {
+      CheckReport check(String flutterName, {String label = ''}) => CrossCheck.run([
+        flutter(1, box, name: flutterName),
+      ], tree([native('0.0', box, label: label, focusable: true)], platform: platform));
 
-    test('fires when the names differ', () {
-      final finding = check('Save', label: 'Submit').findings.single;
+      test('$platform: fires when the names differ', () {
+        final finding = check('Save', label: 'Submit').findings.single;
 
-      expect(finding.rule, 'name-mismatch');
-      expect(finding.source, 'crosscheck');
-      expect(finding.severity, 'warning');
-      expect(finding.flutterId, 1);
-      expect(finding.nativePath, '0.0');
-      expect(finding.rect, box);
-      expect(finding.message, 'Flutter name "Save" differs from native label "Submit"');
+        expect(finding.rule, 'name-mismatch');
+        expect(finding.source, 'crosscheck');
+        expect(finding.severity, 'warning');
+        expect(finding.flutterId, 1);
+        expect(finding.nativePath, '0.0');
+        expect(finding.rect, box);
+        expect(finding.message, 'Flutter name "Save" differs from native label "Submit"');
+      });
+
+      test('$platform: does not fire when the names are equal after normalization', () {
+        expect(check('  Save\n  the   Form. ', label: 'save the form;').findings, isEmpty);
+      });
+
+      test('$platform: fires when Flutter has no name but the native node has a label', () {
+        expect(check('', label: 'Extra').findings.single.rule, 'name-mismatch');
+      });
+    }
+
+    group('android compares with what the bridge composes', () {
+      List<String> messages(FlutterNode node, NativeNode nativeNode) => [
+        for (final f in CrossCheck.run([node], tree([nativeNode])).findings) f.message,
+      ];
+
+      test('value, name and hint joined with ", " in the content description', () {
+        final slider = flutter(1, box, role: 'slider', name: 'Volume', value: '50%');
+        final progress = flutter(1, box, name: 'Upload', value: '40', hint: 'Updates live');
+
+        expect(messages(slider, native('0', box, role: 'slider', label: '50%, Volume', focusable: true)), isEmpty);
+        expect(messages(progress, native('0', box, label: '40, Upload, Updates live', focusable: true)), isEmpty);
+        expect(messages(slider, native('0', box, role: 'slider', label: 'Volume, 50%', focusable: true)), [
+          'Flutter value + name "50%, Volume" differs from native label "Volume, 50%"',
+        ]);
+      });
+
+      test('a value-only node', () {
+        final node = flutter(1, box, value: '40');
+
+        expect(messages(node, native('0', box, label: '40', focusable: true)), isEmpty);
+        expect(messages(node, native('0', box, label: '41', focusable: true)), [
+          'Flutter value "40" differs from native label "41"',
+        ]);
+      });
+
+      test('a text field: label and hint joined in the hint text, the value apart', () {
+        final field = flutter(1, box, role: 'textField', name: 'E-mail', value: 'a@b.c', hint: 'Work address');
+        NativeNode editText(String hint) =>
+            native('0', box, role: 'textField', value: 'a@b.c', hint: hint, clickable: true);
+
+        expect(messages(field, editText('E-mail, Work address')), isEmpty);
+        expect(messages(field, editText('E-mail')), [
+          'Flutter name + hint "E-mail, Work address" differs from native hint "E-mail"',
+        ]);
+      });
+
+      test('a route scope: not focusable, no label and no hint', () {
+        final dialog = flutter(1, box, name: 'Alert');
+
+        expect(messages(dialog, native('0', box)), isEmpty);
+        expect(messages(dialog, native('0', box, focusable: true)), [
+          'Flutter name "Alert" differs from native label ""',
+        ], reason: 'a focusable node without a label is not a route scope');
+      });
+
+      test('a real label difference still fires', () {
+        expect(messages(flutter(1, box, name: 'Save', actions: ['tap']), native('0', box, label: 'Submit')), [
+          'Flutter name "Save" differs from native label "Submit"',
+        ]);
+      });
     });
 
-    test('does not fire when the names are equal after normalization', () {
-      expect(check('  Save\n  the   Form. ', label: 'save the form;').findings, isEmpty);
-    });
+    group('ios compares the name alone', () {
+      CheckReport check(FlutterNode node, NativeNode nativeNode) =>
+          CrossCheck.run([node], tree([nativeNode], platform: 'ios'));
 
-    test('falls back to the native hint when the label is empty', () {
-      expect(check('E-mail', hint: 'E-mail').findings, isEmpty);
-      expect(
-        check('E-mail', hint: 'Email').findings.single.message,
-        'Flutter name "E-mail" differs from native hint "Email"',
-      );
-    });
+      test('the value and hint stay apart from the label', () {
+        final slider = flutter(1, box, role: 'slider', name: 'Volume', value: '50%', hint: 'Adjust');
 
-    test('does not fall back to the hint when the label is set', () {
-      expect(check('E-mail', label: 'Mail', hint: 'E-mail').findings.single.rule, 'name-mismatch');
-    });
+        expect(check(slider, native('0', box, label: 'Volume', value: '50%', focusable: true)).findings, isEmpty);
+        expect(
+          check(slider, native('0', box, label: '50%, Volume', focusable: true)).findings.single.message,
+          'Flutter name "Volume" differs from native label "50%, Volume"',
+        );
+      });
 
-    test('fires when Flutter has no name but the native node has a label', () {
-      expect(check('', label: 'Extra').findings.single.rule, 'name-mismatch');
+      test('an unlabeled node that is not focusable still fires', () {
+        expect(check(flutter(1, box, name: 'Alert'), native('0', box)).findings.single.rule, 'name-mismatch');
+      });
+
+      test('falls back to the native hint when the label is empty', () {
+        final field = flutter(1, box, name: 'E-mail');
+
+        expect(check(field, native('0', box, hint: 'E-mail')).findings, isEmpty);
+        expect(
+          check(field, native('0', box, hint: 'Email')).findings.single.message,
+          'Flutter name "E-mail" differs from native hint "Email"',
+        );
+      });
+
+      test('does not fall back to the hint when the label is set', () {
+        final report = check(flutter(1, box, name: 'E-mail'), native('0', box, label: 'Mail', hint: 'E-mail'));
+
+        expect(report.findings.single.rule, 'name-mismatch');
+      });
     });
   });
 
@@ -358,6 +456,18 @@ void main() {
         expect(CrossCheck.run([], tree([node])).findings, isEmpty);
       });
     }
+
+    test('does not fire for a node with no area', () {
+      final report = CrossCheck.run(
+        [],
+        tree([
+          native('0', const A11yRect(10, 10, 0, 0), clickable: true),
+          native('1', const A11yRect(10, 10, 48, 0), clickable: true),
+        ], platform: 'ios'),
+      );
+
+      expect(report.findings, isEmpty);
+    });
 
     test('does not fire when a descendant has a label', () {
       final report = CrossCheck.run(
@@ -440,8 +550,8 @@ void main() {
       expect(json['app'], 'dev.poc.marionette_a11y_example');
       expect(json['flutter'], {'nodes': snapshot['nodes']});
       expect(json['native'], nativeJson);
-      expect(json['matches'], hasLength(3));
-      expect(json['findings'], hasLength(3));
+      expect(json['matches'], hasLength(5));
+      expect(json['findings'], hasLength(5));
     });
 
     test('summary prints counts per severity, then one line per finding', () {

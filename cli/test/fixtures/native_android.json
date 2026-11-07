@@ -18,8 +18,8 @@
       "hint": "",
       "identifier": "",
       "rect": [
-        0,
-        0,
+        0.0,
+        0.0,
         411.4,
         914.3
       ],
@@ -31,102 +31,191 @@
       "heading": false
     },
     {
-      "path": "0.0",
-      "nativeType": "android.widget.Button",
-      "role": "button",
-      "label": "Save",
-      "value": "",
-      "hint": "",
-      "identifier": "save_button",
-      "rect": [
-        16,
-        100.5,
-        120,
-        48
-      ],
-      "focusable": true,
-      "clickable": true,
-      "enabled": true,
-      "selected": false,
-      "checked": null,
-      "heading": false
-    },
-    {
-      "path": "0.1",
-      "nativeType": "android.widget.EditText",
-      "role": "textField",
-      "label": "",
-      "value": "",
-      "hint": "Email",
-      "identifier": "email_field",
-      "rect": [
-        16,
-        160,
-        379.4,
-        56
-      ],
-      "focusable": true,
-      "clickable": true,
-      "enabled": true,
-      "selected": false,
-      "checked": null,
-      "heading": false
-    },
-    {
-      "path": "0.2",
+      "path": "0.0.0.0.0.0.0.0",
       "nativeType": "android.view.View",
-      "role": "button",
+      "role": "other",
       "label": "",
       "value": "",
       "hint": "",
       "identifier": "",
       "rect": [
-        340,
-        20,
-        48,
-        48
-      ],
-      "focusable": true,
-      "clickable": true,
-      "enabled": true,
-      "selected": false,
-      "checked": null,
-      "heading": false
-    },
-    {
-      "path": "0.3",
-      "nativeType": "android.widget.TextView",
-      "role": "header",
-      "label": "Settings",
-      "value": "",
-      "hint": "",
-      "identifier": "",
-      "rect": [
-        16,
-        24,
-        200,
-        32
+        0.0,
+        24.0,
+        411.4,
+        866.3
       ],
       "focusable": false,
       "clickable": false,
       "enabled": true,
       "selected": false,
       "checked": null,
-      "heading": true
+      "heading": false
+    },
+    {
+      "path": "0.0.0.0.0.0.0.0.0",
+      "nativeType": "android.view.View",
+      "role": "button",
+      "label": "Umów wizytę",
+      "value": "",
+      "hint": "",
+      "identifier": "",
+      "rect": [
+        16.0,
+        40.0,
+        379.4,
+        32.0
+      ],
+      "focusable": true,
+      "clickable": true,
+      "enabled": true,
+      "selected": false,
+      "checked": null,
+      "heading": false
+    },
+    {
+      "path": "0.0.0.0.0.0.0.0.2",
+      "nativeType": "android.widget.EditText",
+      "role": "textField",
+      "label": "",
+      "value": "",
+      "hint": "E-mail",
+      "identifier": "email",
+      "rect": [
+        16.0,
+        88.0,
+        379.4,
+        56.0
+      ],
+      "focusable": true,
+      "clickable": true,
+      "enabled": true,
+      "selected": false,
+      "checked": null,
+      "heading": false
+    },
+    {
+      "path": "0.0.0.0.0.0.0.0.3",
+      "nativeType": "android.view.View",
+      "role": "text",
+      "label": "Morfologia",
+      "value": "",
+      "hint": "",
+      "identifier": "",
+      "rect": [
+        16.0,
+        144.0,
+        379.4,
+        56.0
+      ],
+      "focusable": true,
+      "clickable": false,
+      "enabled": true,
+      "selected": false,
+      "checked": null,
+      "heading": false
+    },
+    {
+      "path": "0.0.0.0.0.0.0.0.3.0",
+      "nativeType": "android.widget.Button",
+      "role": "button",
+      "label": "Usuń",
+      "value": "",
+      "hint": "",
+      "identifier": "",
+      "rect": [
+        355.4,
+        164.2,
+        16.0,
+        16.0
+      ],
+      "focusable": true,
+      "clickable": true,
+      "enabled": true,
+      "selected": false,
+      "checked": null,
+      "heading": false
+    },
+    {
+      "path": "0.0.0.0.0.0.0.0.5",
+      "nativeType": "android.view.View",
+      "role": "other",
+      "label": "",
+      "value": "",
+      "hint": "",
+      "identifier": "",
+      "rect": [
+        16.0,
+        256.0,
+        379.4,
+        48.0
+      ],
+      "focusable": false,
+      "clickable": false,
+      "enabled": true,
+      "selected": false,
+      "checked": null,
+      "heading": false
+    },
+    {
+      "path": "0.0.0.0.0.0.0.0.5.0",
+      "nativeType": "android.widget.Button",
+      "role": "button",
+      "label": "",
+      "value": "",
+      "hint": "",
+      "identifier": "",
+      "rect": [
+        16.0,
+        256.0,
+        48.0,
+        48.0
+      ],
+      "focusable": true,
+      "clickable": true,
+      "enabled": true,
+      "selected": false,
+      "checked": null,
+      "heading": false
     }
   ],
   "issues": [
     {
       "source": "atf",
+      "check": "SpeakableTextPresentCheck",
+      "severity": "error",
+      "message": "This item may not have a label readable by screen readers.",
+      "nodePath": "0.0.0.0.0.0.0.0.5.0",
+      "rect": [
+        16.0,
+        256.0,
+        48.0,
+        48.0
+      ]
+    },
+    {
+      "source": "atf",
       "check": "TouchTargetSizeCheck",
       "severity": "error",
-      "message": "View is too small to touch",
-      "nodePath": "0.2",
+      "message": "This item's size is 16dp x 16dp. Consider making this touch target 48dp wide and 48dp high or larger.",
+      "nodePath": "0.0.0.0.0.0.0.0.3.0",
       "rect": [
-        340,
-        20,
-        48,
-        48
+        355.4,
+        164.2,
+        16.0,
+        16.0
+      ]
+    },
+    {
+      "source": "atf",
+      "check": "TextContrastCheck",
+      "severity": "warning",
+      "message": "The item's text contrast ratio is 4.33. This ratio is based on an estimated foreground color of #79747E and an estimated background color of #FEF7FF. Consider using colors that result in a contrast ratio greater than 4.50 for small text, or 3.00 for large text.",
+      "nodePath": "0.0.0.0.0.0.0.0.2",
+      "rect": [
+        16.0,
+        88.0,
+        379.4,
+        56.0
       ]
     }
   ]

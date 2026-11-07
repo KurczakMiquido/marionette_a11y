@@ -20,7 +20,7 @@ void main() {
     final tree = await NativeProbe(probesDir: probes.path, platform: 'ios', device: 'UDID-1', app: 'dev.app').run();
 
     expect(tree.platform, 'ios');
-    expect(tree.nodes, hasLength(5));
+    expect(tree.nodes, hasLength((fixture('native_ios')['nodes'] as List).length));
     final args = recordedArgs(probes, platform: 'ios');
     expect(args.take(2), ['UDID-1', 'dev.app']);
     expect(args.last, endsWith('.json'));

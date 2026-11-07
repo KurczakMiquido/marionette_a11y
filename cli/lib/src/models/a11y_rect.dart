@@ -19,6 +19,8 @@ class A11yRect {
 
   List<double> toList() => [left, top, width, height];
 
+  bool get isEmpty => width <= 0 || height <= 0;
+
   /// Intersection over union; 0 when disjoint or when both rects are empty.
   double iou(A11yRect other) {
     final w = math.min(left + width, other.left + other.width) - math.max(left, other.left);

@@ -41,14 +41,14 @@ class CrossCheck {
         }
         continue;
       }
-      final (field, nativeName) = n.label.isNotEmpty || n.hint.isEmpty ? ('label', n.label) : ('hint', n.hint);
-      if (normalize(f.name) != normalize(nativeName)) {
+      final mismatch = native.platform == 'android' ? _androidNameMismatch(f, n) : _nameMismatch(f, n);
+      if (mismatch != null) {
         findings.add(
           Finding(
             rule: 'name-mismatch',
             source: _source,
             severity: 'warning',
-            message: 'Flutter name "${f.name}" differs from native $field "$nativeName"',
+            message: mismatch,
             flutterId: f.id,
             nativePath: n.path,
             rect: f.rect,
@@ -59,6 +59,8 @@ class CrossCheck {
 
     for (final n in native.nodes) {
       if (!n.clickable || n.label.isNotEmpty || n.value.isNotEmpty || n.hint.isNotEmpty) continue;
+      // iOS lists hidden Flutter nodes with a zero frame; nobody can reach them.
+      if (n.rect.isEmpty) continue;
       final prefix = '${n.path}.';
       if (native.nodes.any((d) => d.path.startsWith(prefix) && d.label.isNotEmpty)) continue;
       findings.add(
@@ -100,7 +102,32 @@ class CrossCheck {
     );
   }
 
-  /// Lowercase, collapse whitespace, trim, strip trailing `.,;:`.
+  /// The Flutter name compared with the native label, or with the native hint when the label is empty, as iOS keeps
+  /// label, value and hint apart. Returns the finding's message, or null when they agree.
+  static String? _nameMismatch(FlutterNode f, NativeNode n) {
+    final (field, nativeName) = n.label.isNotEmpty || n.hint.isEmpty ? ('label', n.label) : ('hint', n.hint);
+    if (normalize(f.name) == normalize(nativeName)) return null;
+    return 'Flutter name "${f.name}" differs from native $field "$nativeName"';
+  }
+
+  /// Flutter's Android bridge joins value, label and hint with ", " into the content description, a text field's
+  /// label and hint into its hint text, and gives a route scope neither. Returns the finding's message, or null when
+  /// the native node says what the bridge composes.
+  static String? _androidNameMismatch(FlutterNode f, NativeNode n) {
+    if (!n.focusable && n.label.isEmpty && n.hint.isEmpty) return null;
+    final textField = f.role == 'textField';
+    final parts = [
+      for (final (what, text) in [if (!textField) ('value', f.value), ('name', f.name), ('hint', f.hint)])
+        if (text.isNotEmpty) (what, text),
+    ];
+    final composed = parts.map((p) => p.$2).join(', ');
+    final (field, nativeText) = textField ? ('hint', n.hint) : ('label', n.label);
+    if (normalize(composed) == normalize(nativeText)) return null;
+    final what = parts.isEmpty ? 'name' : parts.map((p) => p.$1).join(' + ');
+    return 'Flutter $what "$composed" differs from native $field "$nativeText"';
+  }
+
+  /// Lowercase, collapse whitespace runs to one space, strip a trailing run of whitespace and `.,;:`, trim.
   static String normalize(String text) =>
       text.toLowerCase().replaceAll(RegExp(r'\s+'), ' ').replaceFirst(RegExp(r'[\s.,;:]+$'), '').trim();
 

@@ -1,0 +1,80 @@
+{
+  "transcript": [
+    "Umów wizytę",
+    "E-mail, Pole edycji",
+    "Morfologia",
+    "Usuń, Przycisk",
+    "Kalendarz, Przycisk"
+  ],
+  "nodes": [
+    {
+      "id": 36,
+      "role": "text",
+      "name": "Umów wizytę",
+      "actions": [
+        "tap"
+      ],
+      "rect": [
+        16.0,
+        102.0,
+        370.0,
+        32.0
+      ]
+    },
+    {
+      "id": 38,
+      "role": "textField",
+      "name": "E-mail",
+      "actions": [
+        "tap",
+        "focus"
+      ],
+      "rect": [
+        16.0,
+        126.0,
+        370.0,
+        56.0
+      ]
+    },
+    {
+      "id": 39,
+      "role": "text",
+      "name": "Morfologia",
+      "selected": false,
+      "rect": [
+        16.0,
+        182.0,
+        370.0,
+        56.0
+      ]
+    },
+    {
+      "id": 40,
+      "role": "button",
+      "name": "Usuń",
+      "actions": [
+        "tap"
+      ],
+      "rect": [
+        346.0,
+        202.0,
+        16.0,
+        16.0
+      ]
+    },
+    {
+      "id": 44,
+      "role": "button",
+      "name": "Kalendarz",
+      "actions": [
+        "tap"
+      ],
+      "rect": [
+        16.0,
+        294.0,
+        48.0,
+        48.0
+      ]
+    }
+  ]
+}

@@ -1,132 +1,250 @@
 {
   "schema": "a11y-native/v1",
   "platform": "ios",
-  "device": "6F1A2B3C-0000-4000-8000-000000000001",
+  "device": "3A884E30-6905-4C55-AF19-133A7AB73B8D",
   "app": "dev.poc.marionetteA11yExample",
   "screen": {
-    "width": 393,
-    "height": 852,
-    "scale": 3
+    "width": 402.0,
+    "height": 874.0,
+    "scale": 3.0
   },
   "nodes": [
     {
       "path": "0",
       "nativeType": "application",
       "role": "other",
-      "label": "Example",
+      "label": "Marionette A11y Example",
       "value": "",
       "hint": "",
       "identifier": "",
       "rect": [
-        0,
-        0,
-        393,
-        852
+        0.0,
+        0.0,
+        402.0,
+        874.0
       ],
       "focusable": true,
       "clickable": false,
       "enabled": true,
       "selected": false,
       "checked": null,
-      "heading": false
+      "heading": null
     },
     {
       "path": "0.0",
-      "nativeType": "button",
-      "role": "button",
-      "label": "Save",
-      "value": "",
-      "hint": "",
-      "identifier": "save_button",
-      "rect": [
-        16,
-        100,
-        120,
-        48
-      ],
-      "focusable": true,
-      "clickable": true,
-      "enabled": true,
-      "selected": false,
-      "checked": null,
-      "heading": false
-    },
-    {
-      "path": "0.1",
-      "nativeType": "textField",
-      "role": "textField",
-      "label": "",
-      "value": "",
-      "hint": "Email",
-      "identifier": "email_field",
-      "rect": [
-        16,
-        160,
-        361,
-        56
-      ],
-      "focusable": true,
-      "clickable": true,
-      "enabled": true,
-      "selected": false,
-      "checked": null,
-      "heading": false
-    },
-    {
-      "path": "0.2",
-      "nativeType": "button",
-      "role": "button",
+      "nativeType": "window",
+      "role": "other",
       "label": "",
       "value": "",
       "hint": "",
       "identifier": "",
       "rect": [
-        330,
-        60,
-        44,
-        44
-      ],
-      "focusable": true,
-      "clickable": true,
-      "enabled": true,
-      "selected": false,
-      "checked": null,
-      "heading": false
-    },
-    {
-      "path": "0.3",
-      "nativeType": "staticText",
-      "role": "text",
-      "label": "Settings",
-      "value": "",
-      "hint": "",
-      "identifier": "",
-      "rect": [
-        16,
-        64,
-        200,
-        32
+        0.0,
+        0.0,
+        402.0,
+        874.0
       ],
       "focusable": true,
       "clickable": false,
       "enabled": true,
       "selected": false,
       "checked": null,
-      "heading": false
+      "heading": null
+    },
+    {
+      "path": "0.0.0.0.0.0.1.1.1.1.1",
+      "nativeType": "other",
+      "role": "other",
+      "label": "",
+      "value": "",
+      "hint": "",
+      "identifier": "",
+      "rect": [
+        0.0,
+        0.0,
+        402.0,
+        874.0
+      ],
+      "focusable": false,
+      "clickable": false,
+      "enabled": true,
+      "selected": false,
+      "checked": null,
+      "heading": null
+    },
+    {
+      "path": "0.0.0.0.0.0.1.1.1.1.1.1",
+      "nativeType": "staticText",
+      "role": "text",
+      "label": "Umów wizytę",
+      "value": "",
+      "hint": "",
+      "identifier": "",
+      "rect": [
+        16.0,
+        78.0,
+        370.0,
+        32.0
+      ],
+      "focusable": true,
+      "clickable": false,
+      "enabled": true,
+      "selected": false,
+      "checked": null,
+      "heading": null
+    },
+    {
+      "path": "0.0.0.0.0.0.1.1.1.1.1.3",
+      "nativeType": "textField",
+      "role": "textField",
+      "label": "E-mail",
+      "value": "",
+      "hint": "",
+      "identifier": "",
+      "rect": [
+        16.0,
+        126.0,
+        370.0,
+        56.0
+      ],
+      "focusable": true,
+      "clickable": true,
+      "enabled": true,
+      "selected": false,
+      "checked": null,
+      "heading": null
+    },
+    {
+      "path": "0.0.0.0.0.0.1.1.1.1.1.4",
+      "nativeType": "other",
+      "role": "other",
+      "label": "",
+      "value": "",
+      "hint": "",
+      "identifier": "",
+      "rect": [
+        0.0,
+        0.0,
+        402.0,
+        874.0
+      ],
+      "focusable": false,
+      "clickable": false,
+      "enabled": true,
+      "selected": false,
+      "checked": null,
+      "heading": null
+    },
+    {
+      "path": "0.0.0.0.0.0.1.1.1.1.1.4.0",
+      "nativeType": "other",
+      "role": "other",
+      "label": "Morfologia",
+      "value": "",
+      "hint": "",
+      "identifier": "",
+      "rect": [
+        16.0,
+        182.0,
+        370.0,
+        56.0
+      ],
+      "focusable": true,
+      "clickable": false,
+      "enabled": true,
+      "selected": false,
+      "checked": null,
+      "heading": null
+    },
+    {
+      "path": "0.0.0.0.0.0.1.1.1.1.1.4.1",
+      "nativeType": "button",
+      "role": "button",
+      "label": "Usuń",
+      "value": "",
+      "hint": "",
+      "identifier": "",
+      "rect": [
+        346.0,
+        202.0,
+        16.0,
+        16.0
+      ],
+      "focusable": true,
+      "clickable": true,
+      "enabled": true,
+      "selected": false,
+      "checked": null,
+      "heading": null
+    },
+    {
+      "path": "0.0.0.0.0.0.1.1.1.1.1.6.0",
+      "nativeType": "other",
+      "role": "other",
+      "label": "",
+      "value": "",
+      "hint": "",
+      "identifier": "",
+      "rect": [
+        16.0,
+        294.0,
+        370.0,
+        48.0
+      ],
+      "focusable": false,
+      "clickable": false,
+      "enabled": true,
+      "selected": false,
+      "checked": null,
+      "heading": null
+    },
+    {
+      "path": "0.0.0.0.0.0.1.1.1.1.1.6.1",
+      "nativeType": "button",
+      "role": "button",
+      "label": "",
+      "value": "",
+      "hint": "",
+      "identifier": "",
+      "rect": [
+        16.0,
+        294.0,
+        48.0,
+        48.0
+      ],
+      "focusable": true,
+      "clickable": true,
+      "enabled": true,
+      "selected": false,
+      "checked": null,
+      "heading": null
     }
   ],
   "issues": [
     {
       "source": "apple",
+      "check": "hitRegion",
+      "severity": "error",
+      "message": "The size of this FlutterSemanticsObject is too small for user to interact.",
+      "nodePath": "0.0.0.0.0.0.1.1.1.1.1.4.1",
+      "rect": [
+        346.0,
+        202.0,
+        16.0,
+        16.0
+      ]
+    },
+    {
+      "source": "apple",
       "check": "sufficientElementDescription",
       "severity": "error",
-      "message": "Element has no description",
-      "nodePath": "0.2",
+      "message": "This FlutterSemanticsObject is missing useful accessibility information.",
+      "nodePath": "0.0.0.0.0.0.1.1.1.1.1.6.1",
       "rect": [
-        330,
-        60,
-        44,
-        44
+        16.0,
+        294.0,
+        48.0,
+        48.0
       ]
     }
   ]
