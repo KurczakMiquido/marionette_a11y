@@ -36,8 +36,10 @@ class A11yProbeTest {
         }
 
         val automation = instrumentation.getUiAutomation(UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES)
+        // Without FLAG_INCLUDE_NOT_IMPORTANT_VIEWS (on by default for UiAutomation) the tree is the one TalkBack gets.
         automation.serviceInfo = automation.serviceInfo.apply {
-            flags = flags or AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS
+            flags = (flags or AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS) and
+                AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS.inv()
         }
         // Connecting turns accessibility on: the window list and Flutter's semantics tree appear only after that.
         try {
@@ -88,10 +90,14 @@ class A11yProbeTest {
 
     private fun walk(node: AccessibilityNodeInfo, path: String, out: MutableList<Walked>) {
         out += Walked(path, node, Rect().also(node::getBoundsInScreen))
-        for (i in 0 until node.childCount) {
-            node.getChild(i)?.let { walk(it, "$path.$i", out) }
-        }
+        visibleChildren(node).forEachIndexed { i, child -> walk(child, "$path.$i", out) }
     }
+
+    // TalkBack skips nodes that are not visible to the user but still reaches their visible descendants.
+    private fun visibleChildren(node: AccessibilityNodeInfo): List<AccessibilityNodeInfo> =
+        (0 until node.childCount).mapNotNull(node::getChild).flatMap {
+            if (it.isVisibleToUser) listOf(it) else visibleChildren(it)
+        }
 
     private fun nodeJson(walked: Walked, scale: Double): JSONObject {
         val node = walked.node
