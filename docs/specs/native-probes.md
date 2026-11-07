@@ -40,6 +40,9 @@ format below, exits non-zero with a one-line reason on failure.
 }
 ```
 
+`device` is the adb serial or simulator UDID the probe ran on; empty when the iOS runner cannot tell. `app` is the
+package name or bundle identifier it read.
+
 `screen` is in logical points; `scale` is physical pixels per point (Android: `densityDpi / 160`).
 
 `nodes` lists the target app's accessibility tree in pre-order (parent before children, children in platform
@@ -150,4 +153,6 @@ dart run a11y_cli:a11y check  --platform android|ios --device <id> --app <appId>
 
 - `--probes-dir` overrides where `run.sh` scripts are found; default is `../probes` relative to the `cli` package.
 - `check` prints a summary: counts per severity, then one line per finding (`[severity] rule — message`).
+- The probe's tree must be for `--app`, and its `device`, when not empty, must be `--device` (iOS UDIDs compared
+  case-insensitively); otherwise the command fails.
 - Exit code 0 when the command ran, whatever the findings; 1 on a usage or probe failure.

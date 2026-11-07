@@ -38,15 +38,29 @@ class NativeProbe {
         final reason = (result.stderr as String).trim();
         throw CliFailure(reason.isNotEmpty ? reason : '$platform probe exited with code ${result.exitCode}');
       }
+      final NativeTree tree;
       try {
-        return NativeTree.fromJson(jsonDecode(await File(out).readAsString()) as Map<String, dynamic>);
+        tree = NativeTree.fromJson(jsonDecode(await File(out).readAsString()) as Map<String, dynamic>);
       } on Object catch (e) {
         // The models cast fields with `as`, so a malformed document surfaces as a TypeError too.
         if (e is! FormatException && e is! TypeError && e is! FileSystemException) rethrow;
         throw CliFailure('$platform probe output is not a valid ${NativeTree.schema} document: $e');
       }
+      _checkAnswered(tree);
+      return tree;
     } finally {
       await tmp.delete(recursive: true);
+    }
+  }
+
+  // Probes run in parallel on one machine; a tree from another app or device must not pass as this one.
+  void _checkAnswered(NativeTree tree) {
+    if (tree.app != app) {
+      throw CliFailure('$platform probe read app "${tree.app}" instead of "$app"');
+    }
+    final sameDevice = platform == 'ios' ? tree.device.toUpperCase() == device.toUpperCase() : tree.device == device;
+    if (tree.device.isNotEmpty && !sameDevice) {
+      throw CliFailure('$platform probe read device "${tree.device}" instead of "$device"');
     }
   }
 }
