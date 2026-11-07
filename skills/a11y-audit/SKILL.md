@@ -25,7 +25,9 @@ Work one screen at a time, on an emulator or simulator. Physical devices are not
 
 ## Wire the app (debug only, never committed)
 
-Only when `connect` succeeds but no `a11y_audit` tool appears. In the app's `pubspec.yaml`:
+Try Connect first: after `connect`, `call_custom_extension` with `{"extension": "a11y.audit"}`. Wire the app only
+when that answers that the extension is unknown, or when `connect` fails on a debug app whose URI is right (no
+`MarionetteBinding` yet). In the app's `pubspec.yaml`:
 
 ```yaml
 dependencies:
@@ -62,7 +64,7 @@ xcrun simctl spawn <udid> log show --last 3h --style compact \
 xcrun simctl spawn <udid> launchctl list | grep <bundle id>
 ```
 
-The PID in the log line (logcat's first number, iOS `Runner[<pid>:…]`) must equal the app's current PID from `pidof`
+The PID in the log line (logcat's PID column after the time, iOS `Runner[<pid>:…]`) must equal the app's current PID from `pidof`
 or `launchctl`; otherwise the line is from an earlier run. Widen `--last` when the app started earlier. Nothing
 found: ask the user for the URI. Each platform's app has its own URI: `connect` to the one you audit and pass the
 same app's URI to that platform's check.
@@ -71,7 +73,8 @@ same app's URI to that platform's check.
   `Unsupported URL scheme 'http'`. The `a11y` CLI takes the http form.
 - After `connect`, `a11y_snapshot` and `a11y_audit` join the tool list. When your client does not show them, call
   `call_custom_extension` with `{"extension": "a11y.audit"}` or
-  `{"extension": "a11y.snapshot", "args": {"locale": "pl", "includeRects": true}}`.
+  `{"extension": "a11y.snapshot", "args": {"locale": "pl", "includeRects": true}}`. An unknown extension: wire the
+  app (above).
 
 ## Per screen
 
@@ -81,7 +84,7 @@ propose per finding (rule, widget, file and line).
 1. Navigate with marionette: `get_interactive_elements`, then `tap` by `text`, `key` or `coordinates`; `scroll_to`,
    `enter_text`, `swipe`, `press_back_button`. During a route transition `get_interactive_elements` can return 0
    elements: call `a11y_snapshot` again until the transcript shows the new screen. Probes never navigate.
-2. `a11y_audit` returns `errors`, `warnings` and `findings`, each with `rule`, `wcag`, `severity`, `message` and the
+2. `a11y_audit` returns `errors` and `warnings` (counts) and `findings`, each with `rule`, `wcag`, `severity`, `message` and the
    `node` (`id`, `role`, `name`, `rect`).
 3. `a11y_snapshot` with `{"locale": "pl", "includeRects": true}` (`en` for an English app), plus `take_screenshots`.
    `transcript` is what TalkBack reads, in swipe order. Anything visible in the screenshot but missing from the
@@ -118,10 +121,10 @@ propose per finding (rule, widget, file and line).
    ```bash
    adb -s <serial> shell settings get system font_scale
    adb -s <serial> shell settings put system font_scale 2.0
-   adb -s <serial> shell settings put system font_scale 1.0
+   adb -s <serial> shell settings put system font_scale <noted value>
    xcrun simctl ui <udid> content_size
    xcrun simctl ui <udid> content_size accessibility-large
-   xcrun simctl ui <udid> content_size large
+   xcrun simctl ui <udid> content_size <noted value>
    ```
 
    On iOS, `accessibility-large` is Flutter's text scale 1.94 (33/17), the closest to 2.0. Android 14+ scales
@@ -144,8 +147,8 @@ testWidgets('booking screen stays accessible', (tester) async {
 
 - `fvm flutter test --update-goldens <test file>` writes the transcript golden (one announcement per line, next to the
   test). Read it: it is what the screen reader says. Then `fvm flutter test <test file>`.
-- `A11yAuditGuideline(failOn: A11ySeverity.warning)` also fails on warnings; it needs
-  `import 'package:marionette_a11y/marionette_a11y.dart' show A11ySeverity;`. A failure lists one finding per line:
+- `A11yAuditGuideline(failOn: A11ySeverity.warning)` also fails on warnings; `testing.dart` exports `A11ySeverity`.
+  A failure lists every finding, one per line:
   `[error] missing-name (WCAG 4.1.2) — … — "<name>" at [l, t, w, h]`.
 - The tests need `marionette_a11y` as a dev dependency. Committing them commits that dependency: ask the user first.
 
@@ -163,10 +166,10 @@ testWidgets('booking screen stays accessible', (tester) async {
 | Rule (source) | Means | Typical fix |
 |---|---|---|
 | `missing-name` (flutter), `native-unnamed` (crosscheck), `SpeakableTextPresentCheck` (ATF), `sufficientElementDescription` (Apple) | Control has no name; the reader says only "button" | `IconButton(tooltip: 'Wybierz termin', …)`; custom tap target: `Semantics(button: true, label: '…')` |
-| `missing-role` (flutter), `role-mismatch` (crosscheck), `trait` (Apple), `ClassNameCheck` (ATF) | Reacts to taps but is read as text or "other". On a text whose rect spans a row: an unnamed tap target (icon) in that row merged into it, missing from the transcript | Real button widget (`IconButton`, `TextButton`, `ListTile(onTap:)`) instead of a bare `InkWell`/`GestureDetector`, or `Semantics(button: true)`; a merged tap target gets its own named widget |
+| `missing-role` (flutter), `role-mismatch` (crosscheck), `trait` (Apple), `ClassNameCheck` (ATF) | Reacts to taps but is read as text, image or other. On a text whose rect spans a row: an unnamed tap target (icon) in that row merged into it, missing from the transcript | Real button widget (`IconButton`, `TextButton`, `ListTile(onTap:)`) instead of a bare `InkWell`/`GestureDetector`, or `Semantics(button: true)`; a merged tap target gets its own named widget |
 | `target-size` (< 24), `target-size-platform` (< 48) (flutter), `TouchTargetSizeCheck` (ATF), `hitRegion` (Apple) | Touch target too small (2.5.8) | Drop `padding: EdgeInsets.zero`, `constraints: BoxConstraints()`, `MaterialTapTargetSize.shrinkWrap`; or `ConstrainedBox(constraints: BoxConstraints(minWidth: 48, minHeight: 48))`. 48 dp Android, 44 pt iOS |
 | `generic-name` (flutter), `LinkPurposeUnclearCheck` (ATF) | Name says nothing: "Kliknij tutaj", "button", `ic_close` | Name the purpose: `'Przeczytaj regulamin'`; decorative image: `excludeFromSemantics: true` |
-| `duplicate-name` (flutter), `DuplicateSpeakableTextCheck` (ATF) | Several controls with one name | Add the object: `tooltip: 'Usuń: $test'` |
+| `duplicate-name` (flutter), `DuplicateSpeakableTextCheck` (ATF) | Several controls with one name | Add the object: `tooltip: 'Usuń: $itemName'` |
 | `role-in-name` (flutter), `RedundantDescriptionCheck` (ATF) | Name repeats the role: "Przycisk zapisz, Przycisk" | Remove "przycisk"/"button" from `semanticsLabel` or `Semantics(label:)` |
 | `usage-hint-in-name` (flutter) | Name says "dwukrotnie"/"double tap" | Remove it; the screen reader adds its own usage hint |
 | `name-repeated` (flutter) | Value equals the name, read twice | Drop the duplicate `value`; keep only state in it |

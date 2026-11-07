@@ -5,7 +5,7 @@ PoC: Flutter's semantics tree as marionette MCP tools, so an agent can check wha
 | MCP tool | What it returns |
 |---|---|
 | `a11y_snapshot` | `transcript` (what TalkBack reads, in swipe order) plus semantics `nodes` |
-| `a11y_audit` | WCAG 2.2 findings: `missing-name`, `missing-role`, `target-size`, `generic-name`, `role-in-name`, `name-repeated`, `usage-hint-in-name`, `duplicate-name`, `no-heading` |
+| `a11y_audit` | WCAG 2.2 findings: `missing-name`, `missing-role`, `target-size`, `generic-name`, `role-in-name`, `name-repeated`, `target-size-platform`, `usage-hint-in-name`, `duplicate-name`, `no-heading` |
 
 ## Wire it in (debug only, never commit to the app)
 
@@ -31,7 +31,9 @@ and every audit passes.
 1. `a11y_audit`: fix every `error`.
 2. `a11y_snapshot` + `take_screenshots`: anything visible but missing from `transcript` is invisible to blind users.
    Judge whether names make sense and the order is logical.
-3. `set_device_config` with text scale 2.0, repeat (WCAG 1.4.4).
+3. Set text scale 2.0 and repeat (WCAG 1.4.4): `adb -s <serial> shell settings put system font_scale 2.0` on Android,
+   `xcrun simctl ui <udid> content_size accessibility-large` on iOS (close to 2.0). Restore the old value afterwards;
+   the skill has the commands.
 4. After each `tap`, snapshot again: a state change must show up in the transcript.
 
 ## Agent skill
@@ -68,7 +70,7 @@ announcement per line, resolved like `matchesGoldenFile`; `flutter test --update
 A probe per platform reads the native accessibility tree of the running app and runs the platform's own checks:
 Android with UiAutomation and the Accessibility Test Framework (ATF), iOS with XCUITest and Apple's accessibility
 audit. The `a11y` CLI in `cli/` runs a probe and compares its tree with the Flutter semantics snapshot. It reports
-Flutter nodes the platform does not expose, names that reach the screen reader differently, unlabeled native
+Flutter nodes the platform does not expose, names and roles that reach the screen reader differently, unlabeled native
 controls, and every ATF or Apple issue.
 
 Prerequisites:
@@ -94,8 +96,8 @@ otherwise:
 `native` writes the native tree (`a11y-native/v1`). `check` writes `a11y-check/v1` and prints counts per severity
 plus one line per finding: the in-app audit first, then the cross-check, then the native issues. It also stores the
 screen reader transcript (`--locale pl|en`, default `pl`). `--html report.html` also writes one self-contained page
-with a screenshot of the screen, a numbered box per finding and the transcript. Formats and rules:
-[docs/specs/native-probes.md](docs/specs/native-probes.md). Exit code 0 when the command ran, whatever it found; 1 on
+with a screenshot of the screen, a numbered box per finding group and the transcript. Formats and rules:
+[docs/specs/native-probes.md](docs/specs/native-probes.md), [docs/specs/report-and-testing.md](docs/specs/report-and-testing.md). Exit code 0 when the command ran, whatever it found; 1 on
 a usage, probe or VM service failure. The first run builds the probe, which takes minutes; later runs take seconds.
 
 Limits:
