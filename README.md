@@ -38,10 +38,50 @@ and every audit passes.
 
 - Rules cover a fraction of WCAG. A hint-only `TextField` is invisible here: Flutter puts `hintText` into the label.
 - The transcript approximates TalkBack. Calibrate against a real TalkBack speech log before trusting wording.
-- No VoiceOver: it does not run in the iOS simulator.
+- iOS speech is not simulated: VoiceOver does not run in the iOS simulator. The native check below shows what iOS
+  exposes to VoiceOver.
+
+## Native check: what TalkBack and VoiceOver receive
+
+A probe per platform reads the native accessibility tree of the running app and runs the platform's own checks:
+Android with UiAutomation and the Accessibility Test Framework (ATF), iOS with XCUITest and Apple's accessibility
+audit. The `a11y` CLI in `cli/` runs a probe and compares its tree with the Flutter semantics snapshot. It reports
+Flutter nodes the platform does not expose, names that reach the screen reader differently, unlabeled native
+controls, and every ATF or Apple issue.
+
+Prerequisites:
+- Android: `ANDROID_HOME` set (the probe's `local.properties` is git-ignored), JDK 17 on `JAVA_HOME` or `PATH`, an
+  emulator with Android 11+.
+- iOS: Xcode, a simulator with iOS 17+.
+- `python3`, and `cd cli && fvm dart pub get` once.
+- The app calls `registerA11yExtensions()` and already shows the screen to check. Probes never launch or navigate it.
+
+```bash
+cd cli
+fvm dart run a11y_cli:a11y native --platform android --device emulator-5580 --app <package> --out native.json
+fvm dart run a11y_cli:a11y check --platform ios --device <simulator UDID> --app <bundle id> \
+  --vm-service <VM service URI> --out check.json
+```
+
+The VM service URI is the `http://127.0.0.1:<port>/<token>=/` line `flutter run` prints. For an app started
+otherwise:
+- Android: `adb -s <serial> logcat -d | grep 'Dart VM service is listening'`, then
+  `adb -s <serial> forward tcp:<port> tcp:<port>`.
+- iOS: `xcrun simctl spawn <udid> log show --last 10m --style compact --predicate 'eventMessage CONTAINS "Dart VM service"'`.
+
+`native` writes the native tree (`a11y-native/v1`). `check` writes `a11y-check/v1` and prints counts per severity
+plus one line per finding. Formats and rules: [docs/specs/native-probes.md](docs/specs/native-probes.md). Exit code
+0 when the command ran, whatever it found; 1 on a usage, probe or VM service failure. The first run builds the probe,
+which takes minutes; later runs take seconds.
+
+Limits:
+- Emulator and simulator only.
+- XCUITest briefly brings its runner to the front, so an app that blurs or locks itself when inactive is read in
+  that state.
+- An app window with `FLAG_SECURE` gives ATF a black screenshot, so its contrast checks see nothing.
 
 ## Run
 
 ```bash
-fvm flutter test && (cd example && fvm flutter test)
+fvm flutter test && (cd example && fvm flutter test) && (cd cli && fvm dart test)
 ```
