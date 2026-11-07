@@ -3,10 +3,10 @@ class NativeScreen {
   const NativeScreen({required this.width, required this.height, required this.scale});
 
   factory NativeScreen.fromJson(Map<String, dynamic> json) => NativeScreen(
-        width: (json['width'] as num).toDouble(),
-        height: (json['height'] as num).toDouble(),
-        scale: (json['scale'] as num).toDouble(),
-      );
+    width: (json['width'] as num).toDouble(),
+    height: (json['height'] as num).toDouble(),
+    scale: (json['scale'] as num).toDouble(),
+  );
 
   final double width;
   final double height;

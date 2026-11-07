@@ -31,14 +31,7 @@ void main() {
   });
 
   test('issue with null nodePath and rect round-trips', () {
-    final json = {
-      'source': 'atf',
-      'check': 'X',
-      'severity': 'info',
-      'message': 'm',
-      'nodePath': null,
-      'rect': null,
-    };
+    final json = {'source': 'atf', 'check': 'X', 'severity': 'info', 'message': 'm', 'nodePath': null, 'rect': null};
     final issue = NativeIssue.fromJson(json);
     expect(issue.nodePath, isNull);
     expect(issue.rect, isNull);

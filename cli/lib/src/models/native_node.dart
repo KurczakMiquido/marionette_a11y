@@ -20,21 +20,21 @@ class NativeNode {
   });
 
   factory NativeNode.fromJson(Map<String, dynamic> json) => NativeNode(
-        path: json['path'] as String,
-        nativeType: json['nativeType'] as String,
-        role: json['role'] as String,
-        label: json['label'] as String,
-        value: json['value'] as String,
-        hint: json['hint'] as String,
-        identifier: json['identifier'] as String,
-        rect: A11yRect.fromList(json['rect'] as List),
-        focusable: json['focusable'] as bool,
-        clickable: json['clickable'] as bool,
-        enabled: json['enabled'] as bool,
-        selected: json['selected'] as bool,
-        checked: json['checked'] as bool?,
-        heading: json['heading'] as bool?,
-      );
+    path: json['path'] as String,
+    nativeType: json['nativeType'] as String,
+    role: json['role'] as String,
+    label: json['label'] as String,
+    value: json['value'] as String,
+    hint: json['hint'] as String,
+    identifier: json['identifier'] as String,
+    rect: A11yRect.fromList(json['rect'] as List),
+    focusable: json['focusable'] as bool,
+    clickable: json['clickable'] as bool,
+    enabled: json['enabled'] as bool,
+    selected: json['selected'] as bool,
+    checked: json['checked'] as bool?,
+    heading: json['heading'] as bool?,
+  );
 
   final String path;
   final String nativeType;
@@ -52,19 +52,19 @@ class NativeNode {
   final bool? heading;
 
   Map<String, dynamic> toJson() => {
-        'path': path,
-        'nativeType': nativeType,
-        'role': role,
-        'label': label,
-        'value': value,
-        'hint': hint,
-        'identifier': identifier,
-        'rect': rect.toList(),
-        'focusable': focusable,
-        'clickable': clickable,
-        'enabled': enabled,
-        'selected': selected,
-        'checked': checked,
-        'heading': heading,
-      };
+    'path': path,
+    'nativeType': nativeType,
+    'role': role,
+    'label': label,
+    'value': value,
+    'hint': hint,
+    'identifier': identifier,
+    'rect': rect.toList(),
+    'focusable': focusable,
+    'clickable': clickable,
+    'enabled': enabled,
+    'selected': selected,
+    'checked': checked,
+    'heading': heading,
+  };
 }

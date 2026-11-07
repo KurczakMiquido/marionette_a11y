@@ -12,13 +12,13 @@ class NativeIssue {
   });
 
   factory NativeIssue.fromJson(Map<String, dynamic> json) => NativeIssue(
-        source: json['source'] as String,
-        check: json['check'] as String,
-        severity: json['severity'] as String,
-        message: json['message'] as String,
-        nodePath: json['nodePath'] as String?,
-        rect: json['rect'] == null ? null : A11yRect.fromList(json['rect'] as List),
-      );
+    source: json['source'] as String,
+    check: json['check'] as String,
+    severity: json['severity'] as String,
+    message: json['message'] as String,
+    nodePath: json['nodePath'] as String?,
+    rect: json['rect'] == null ? null : A11yRect.fromList(json['rect'] as List),
+  );
 
   final String source;
   final String check;
@@ -28,11 +28,11 @@ class NativeIssue {
   final A11yRect? rect;
 
   Map<String, dynamic> toJson() => {
-        'source': source,
-        'check': check,
-        'severity': severity,
-        'message': message,
-        'nodePath': nodePath,
-        'rect': rect?.toList(),
-      };
+    'source': source,
+    'check': check,
+    'severity': severity,
+    'message': message,
+    'nodePath': nodePath,
+    'rect': rect?.toList(),
+  };
 }

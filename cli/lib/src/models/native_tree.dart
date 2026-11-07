@@ -37,12 +37,12 @@ class NativeTree {
   final List<NativeIssue> issues;
 
   Map<String, dynamic> toJson() => {
-        'schema': schema,
-        'platform': platform,
-        'device': device,
-        'app': app,
-        'screen': screen.toJson(),
-        'nodes': [for (final n in nodes) n.toJson()],
-        'issues': [for (final i in issues) i.toJson()],
-      };
+    'schema': schema,
+    'platform': platform,
+    'device': device,
+    'app': app,
+    'screen': screen.toJson(),
+    'nodes': [for (final n in nodes) n.toJson()],
+    'issues': [for (final i in issues) i.toJson()],
+  };
 }
