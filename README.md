@@ -5,7 +5,7 @@ PoC: Flutter's semantics tree as marionette MCP tools, so an agent can check wha
 | MCP tool | What it returns |
 |---|---|
 | `a11y_snapshot` | `transcript` (what TalkBack reads, in swipe order) plus semantics `nodes` |
-| `a11y_audit` | WCAG 2.2 findings: `missing-name`, `missing-role`, `target-size`, `generic-name`, `role-in-name`, `duplicate-name`, `no-heading` |
+| `a11y_audit` | WCAG 2.2 findings: `missing-name`, `missing-role`, `target-size`, `generic-name`, `role-in-name`, `name-repeated`, `usage-hint-in-name`, `duplicate-name`, `no-heading` |
 
 ## Wire it in (debug only, never commit to the app)
 
