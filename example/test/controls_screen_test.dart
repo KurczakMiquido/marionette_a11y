@@ -21,4 +21,18 @@ void main() {
     expect(find.byType(AlertDialog), findsOneWidget);
     handle.dispose();
   });
+
+  testWidgets('the save button is one node with a label and a tooltip', (tester) async {
+    final handle = tester.ensureSemantics();
+    await tester.pumpWidget(const MaterialApp(home: ControlsScreen()));
+
+    expect(
+      [
+        for (final node in A11ySnapshot.capture().nodes)
+          if (node.tooltip.isNotEmpty) (node.role, node.label, node.tooltip),
+      ],
+      [(A11yRole.button, 'Zapisz', 'Zapisuje ustawienia')],
+    );
+    handle.dispose();
+  });
 }

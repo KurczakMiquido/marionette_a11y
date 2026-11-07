@@ -102,30 +102,38 @@ class CrossCheck {
     );
   }
 
-  /// The Flutter name compared with the native label, or with the native hint when the label is empty, as iOS keeps
-  /// label, value and hint apart. Returns the finding's message, or null when they agree.
+  /// Flutter's iOS bridge joins label and tooltip with a newline into the accessibility label. That is compared with
+  /// the native label, or with the native hint when the label is empty, as iOS keeps label, value and hint apart.
+  /// Returns the finding's message, or null when they agree.
   static String? _nameMismatch(FlutterNode f, NativeNode n) {
     final (field, nativeName) = n.label.isNotEmpty || n.hint.isEmpty ? ('label', n.label) : ('hint', n.hint);
-    if (normalize(f.name) == normalize(nativeName)) return null;
-    return 'Flutter name "${f.name}" differs from native $field "$nativeName"';
+    final parts = [
+      for (final (what, text) in [('name', f.label), ('tooltip', f.tooltip)])
+        if (text.isNotEmpty) (what, text),
+    ];
+    final composed = parts.map((p) => p.$2).join('\n');
+    if (normalize(composed) == normalize(nativeName)) return null;
+    return 'Flutter ${_parts(parts)} "$composed" differs from native $field "$nativeName"';
   }
 
-  /// Flutter's Android bridge joins value, label and hint with ", " into the content description, a text field's
-  /// label and hint into its hint text, and gives a route scope neither. Returns the finding's message, or null when
-  /// the native node says what the bridge composes.
+  /// Flutter's Android bridge joins value, label and hint with ", " into the content description (the tooltip when
+  /// all three are empty), a text field's label and hint into its hint text, and gives a route scope neither.
+  /// Returns the finding's message, or null when the native node says what the bridge composes.
   static String? _androidNameMismatch(FlutterNode f, NativeNode n) {
     if (!n.focusable && n.label.isEmpty && n.hint.isEmpty) return null;
     final textField = f.role == 'textField';
-    final parts = [
-      for (final (what, text) in [if (!textField) ('value', f.value), ('name', f.name), ('hint', f.hint)])
+    var parts = [
+      for (final (what, text) in [if (!textField) ('value', f.value), ('name', f.label), ('hint', f.hint)])
         if (text.isNotEmpty) (what, text),
     ];
+    if (parts.isEmpty && !textField && f.tooltip.isNotEmpty) parts = [('tooltip', f.tooltip)];
     final composed = parts.map((p) => p.$2).join(', ');
     final (field, nativeText) = textField ? ('hint', n.hint) : ('label', n.label);
     if (normalize(composed) == normalize(nativeText)) return null;
-    final what = parts.isEmpty ? 'name' : parts.map((p) => p.$1).join(' + ');
-    return 'Flutter $what "$composed" differs from native $field "$nativeText"';
+    return 'Flutter ${_parts(parts)} "$composed" differs from native $field "$nativeText"';
   }
+
+  static String _parts(List<(String, String)> parts) => parts.isEmpty ? 'name' : parts.map((p) => p.$1).join(' + ');
 
   /// Lowercase, collapse whitespace runs to one space, strip a trailing run of whitespace and `.,;:`, trim.
   static String normalize(String text) =>

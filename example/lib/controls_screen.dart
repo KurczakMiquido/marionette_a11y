@@ -32,6 +32,20 @@ class _ControlsScreenState extends State<ControlsScreen> {
           const SizedBox(height: 24),
           const LinearProgressIndicator(value: 0.4, semanticsLabel: 'Postęp pobierania'),
           const SizedBox(height: 24),
+          // One node with a label and a tooltip (a plain Tooltip would make a second node): iOS speaks both, Android
+          // only the label.
+          Semantics(
+            container: true,
+            button: true,
+            label: 'Zapisz',
+            tooltip: 'Zapisuje ustawienia',
+            onTap: () {},
+            child: const SizedBox(
+              height: 48,
+              child: Center(child: ExcludeSemantics(child: Text('Zapisz'))),
+            ),
+          ),
+          const SizedBox(height: 24),
           ElevatedButton(onPressed: _showDialog, child: const Text('Pokaż okno')),
         ],
       ),

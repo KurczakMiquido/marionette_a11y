@@ -67,4 +67,35 @@ void main() {
     expect(node.rect, const Rect.fromLTWH(30, 40, 100, 50));
     handle.dispose();
   });
+
+  testWidgets('toJson carries the tooltip next to the name, and leaves it out when empty', (tester) async {
+    final handle = tester.ensureSemantics();
+    final snapshot = await _capture(
+      tester,
+      Column(
+        children: [
+          Semantics(
+            container: true,
+            button: true,
+            label: 'Zapisz',
+            tooltip: 'Zapisuje ustawienia',
+            onTap: () {},
+            child: const SizedBox(width: 80, height: 48),
+          ),
+          Semantics(
+            container: true,
+            button: true,
+            label: 'Anuluj',
+            onTap: () {},
+            child: const SizedBox(width: 80, height: 48),
+          ),
+        ],
+      ),
+    );
+
+    final json = [for (final node in snapshot.nodes) node.toJson()];
+    expect(json.firstWhere((j) => j['name'] == 'Zapisz')['tooltip'], 'Zapisuje ustawienia');
+    expect(json.firstWhere((j) => j['name'] == 'Anuluj').containsKey('tooltip'), isFalse);
+    handle.dispose();
+  });
 }

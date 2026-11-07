@@ -16,6 +16,7 @@ FlutterNode flutter(
   String name = '',
   String value = '',
   String hint = '',
+  String tooltip = '',
   String identifier = '',
   bool header = false,
   bool offscreen = false,
@@ -27,6 +28,7 @@ FlutterNode flutter(
   name: name,
   value: value,
   hint: hint,
+  tooltip: tooltip,
   identifier: identifier,
   header: header,
   offscreen: offscreen,
@@ -381,6 +383,33 @@ void main() {
         ], reason: 'a focusable node without a label is not a route scope');
       });
 
+      test('label and tooltip: the tooltip stays out of the content description', () {
+        final node = flutter(1, box, name: 'Zapisz', tooltip: 'Zapisuje ustawienia');
+
+        expect(messages(node, native('0', box, label: 'Zapisz', focusable: true)), isEmpty);
+      });
+
+      test('tooltip only: the content description is the tooltip, even with an empty value, label and hint', () {
+        final node = flutter(1, box, name: 'Zapisuje', tooltip: 'Zapisuje');
+
+        expect(messages(node, native('0', box, label: 'Zapisuje', focusable: true)), isEmpty);
+        expect(messages(node, native('0', box, label: 'Inne', focusable: true)), [
+          'Flutter tooltip "Zapisuje" differs from native label "Inne"',
+        ]);
+      });
+
+      test('value and tooltip without a label: the value alone', () {
+        final node = flutter(1, box, name: 'Głośność', value: '50%', tooltip: 'Głośność');
+
+        expect(messages(node, native('0', box, label: '50%', focusable: true)), isEmpty);
+      });
+
+      test('a text field ignores the tooltip in its hint text', () {
+        final field = flutter(1, box, role: 'textField', name: 'E-mail', tooltip: 'Adres');
+
+        expect(messages(field, native('0', box, role: 'textField', hint: 'E-mail', clickable: true)), isEmpty);
+      });
+
       test('a real label difference still fires', () {
         expect(messages(flutter(1, box, name: 'Save', actions: ['tap']), native('0', box, label: 'Submit')), [
           'Flutter name "Save" differs from native label "Submit"',
@@ -413,6 +442,27 @@ void main() {
         expect(
           check(field, native('0', box, hint: 'Email')).findings.single.message,
           'Flutter name "E-mail" differs from native hint "Email"',
+        );
+      });
+
+      test('label and tooltip joined with a newline match the native label', () {
+        final node = flutter(1, box, name: 'Zapisz', tooltip: 'Zapisuje ustawienia');
+
+        expect(check(node, native('0', box, label: 'Zapisz\nZapisuje ustawienia', focusable: true)).findings, isEmpty);
+      });
+
+      test('a tooltip alone matches the native label', () {
+        final node = flutter(1, box, name: 'Zapisuje', tooltip: 'Zapisuje');
+
+        expect(check(node, native('0', box, label: 'Zapisuje', focusable: true)).findings, isEmpty);
+      });
+
+      test('a mismatch names the tooltip when it took part', () {
+        final node = flutter(1, box, name: 'Zapisz', tooltip: 'Zapisuje ustawienia');
+
+        expect(
+          check(node, native('0', box, label: 'Zapisz', focusable: true)).findings.single.message,
+          'Flutter name + tooltip "Zapisz\nZapisuje ustawienia" differs from native label "Zapisz"',
         );
       });
 

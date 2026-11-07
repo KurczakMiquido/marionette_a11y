@@ -93,6 +93,7 @@ class A11yNode {
     if (name.isNotEmpty) 'name': name,
     if (value.isNotEmpty) 'value': value,
     if (hint.isNotEmpty) 'hint': hint,
+    if (tooltip.isNotEmpty) 'tooltip': tooltip,
     if (identifier.isNotEmpty) 'identifier': identifier,
     if (isHeader) 'header': true,
     if (offscreen) 'offscreen': true,

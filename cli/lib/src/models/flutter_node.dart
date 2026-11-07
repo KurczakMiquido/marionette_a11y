@@ -9,6 +9,7 @@ class FlutterNode {
     this.name = '',
     this.value = '',
     this.hint = '',
+    this.tooltip = '',
     this.identifier = '',
     this.header = false,
     this.offscreen = false,
@@ -27,6 +28,7 @@ class FlutterNode {
     name: json['name'] as String? ?? '',
     value: json['value'] as String? ?? '',
     hint: json['hint'] as String? ?? '',
+    tooltip: json['tooltip'] as String? ?? '',
     identifier: json['identifier'] as String? ?? '',
     header: json['header'] as bool? ?? false,
     offscreen: json['offscreen'] as bool? ?? false,
@@ -44,6 +46,7 @@ class FlutterNode {
   final String name;
   final String value;
   final String hint;
+  final String tooltip;
   final String identifier;
   final bool header;
   final bool offscreen;
@@ -54,6 +57,10 @@ class FlutterNode {
   final bool? expanded;
   final List<String> actions;
 
+  /// The semantics label alone. `name` is the label, else the tooltip, so a name equal to a non-empty tooltip is
+  /// taken as no label; a label that equals its tooltip cannot be told apart from that.
+  String get label => tooltip.isNotEmpty && name == tooltip ? '' : name;
+
   /// Optional keys are left out when empty, false or unset, as the in-app snapshot does.
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -61,6 +68,7 @@ class FlutterNode {
     if (name.isNotEmpty) 'name': name,
     if (value.isNotEmpty) 'value': value,
     if (hint.isNotEmpty) 'hint': hint,
+    if (tooltip.isNotEmpty) 'tooltip': tooltip,
     if (identifier.isNotEmpty) 'identifier': identifier,
     if (header) 'header': true,
     if (offscreen) 'offscreen': true,
