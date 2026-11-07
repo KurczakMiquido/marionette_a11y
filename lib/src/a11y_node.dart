@@ -22,9 +22,10 @@ class A11yNode {
     this.enabled,
     this.expanded,
     this.actions = const {},
+    this.hasNamedDescendants = false,
   });
 
-  factory A11yNode.fromSemantics(SemanticsNode node, Rect globalRect) {
+  factory A11yNode.fromSemantics(SemanticsNode node, Rect globalRect, {bool hasNamedDescendants = false}) {
     final data = node.getSemanticsData();
     final flags = data.flagsCollection;
 
@@ -52,6 +53,7 @@ class A11yNode {
         for (final action in SemanticsAction.values)
           if (data.hasAction(action)) action,
       },
+      hasNamedDescendants: hasNamedDescendants,
     );
   }
 
@@ -71,6 +73,10 @@ class A11yNode {
   final bool? enabled;
   final bool? expanded;
   final Set<SemanticsAction> actions;
+  final bool hasNamedDescendants;
+
+  // TalkBack skips an unnamed actionable node whose children speak (verified on a real device).
+  bool get isSkippedContainer => name.isEmpty && hasNamedDescendants;
 
   // Screen readers fall back to the tooltip when there is no label.
   String get name => label.isNotEmpty ? label : tooltip;

@@ -51,6 +51,21 @@ void main() {
     handle.dispose();
   });
 
+  testWidgets('unnamed tappable container with named children is skipped, as TalkBack does', (tester) async {
+    final handle = tester.ensureSemantics();
+    final findings = await _audit(tester, [
+      _heading,
+      Semantics(
+        container: true,
+        onTap: () {},
+        child: ElevatedButton(onPressed: () {}, child: const Text('Zapisz')),
+      ),
+    ]);
+
+    expect(findings, isEmpty);
+    handle.dispose();
+  });
+
   testWidgets('target under 24x24 fails 2.5.8, under 48x48 warns', (tester) async {
     final handle = tester.ensureSemantics();
     Widget target(String label, double size) => Semantics(
@@ -92,6 +107,39 @@ void main() {
     ]);
 
     expect(_rules(findings), ['role-in-name']);
+    handle.dispose();
+  });
+
+  testWidgets('value repeating the name is flagged', (tester) async {
+    final handle = tester.ensureSemantics();
+    final findings = await _audit(tester, [
+      _heading,
+      // Mirrors CloseButtonAppBar in the Diagnostyka app.
+      MergeSemantics(
+        child: Semantics(
+          value: 'Zamknij',
+          child: IconButton(tooltip: 'Zamknij', onPressed: () {}, icon: const Icon(Icons.close)),
+        ),
+      ),
+    ]);
+
+    expect(_rules(findings), ['name-repeated']);
+    handle.dispose();
+  });
+
+  testWidgets('usage instruction baked into the name is flagged', (tester) async {
+    final handle = tester.ensureSemantics();
+    final findings = await _audit(tester, [
+      _heading,
+      Semantics(
+        container: true,
+        textField: true,
+        label: 'E-mail. Kliknij dwukrotnie, aby edytować tekst.',
+        child: const SizedBox(width: 200, height: 48),
+      ),
+    ]);
+
+    expect(_rules(findings), ['usage-hint-in-name']);
     handle.dispose();
   });
 

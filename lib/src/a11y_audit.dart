@@ -24,6 +24,7 @@ const _genericNames = {
 };
 final _assetLikeName = RegExp(r'^[a-z0-9]+(_[a-z0-9]+)+$|\.(png|svg|webp|jpe?g)$');
 final _roleWords = RegExp('przycisk|button', caseSensitive: false);
+final _usageHint = RegExp('dwukrotnie|double.tap', caseSensitive: false);
 
 /// Checks what the semantics tree can prove. Covers a fraction of WCAG 2.2, not conformance.
 abstract final class A11yAudit {
@@ -37,6 +38,8 @@ abstract final class A11yAudit {
         if (!node.offscreen) ?_targetSize(node),
         ?_genericName(node),
         ?_roleInName(node),
+        ?_nameRepeated(node),
+        ?_usageHintInName(node),
       ],
       ..._duplicateNames(onscreen),
       if (onscreen.isNotEmpty && !onscreen.any((node) => node.isHeader))
@@ -50,7 +53,7 @@ abstract final class A11yAudit {
   }
 
   static A11yFinding? _missingName(A11yNode node) {
-    if (!node.isActionable || node.name.isNotEmpty) return null;
+    if (!node.isActionable || node.name.isNotEmpty || node.isSkippedContainer) return null;
 
     return A11yFinding(
       rule: 'missing-name',
@@ -63,7 +66,9 @@ abstract final class A11yAudit {
 
   // A bare InkWell or GestureDetector merges its tap into the nearest text and never says "button".
   static A11yFinding? _missingRole(A11yNode node) {
-    if (!node.isTappable || node.role != A11yRole.text && node.role != A11yRole.image) return null;
+    if (!node.isTappable || node.isSkippedContainer || node.role != A11yRole.text && node.role != A11yRole.image) {
+      return null;
+    }
 
     return A11yFinding(
       rule: 'missing-role',
@@ -121,6 +126,30 @@ abstract final class A11yAudit {
       severity: A11ySeverity.warning,
       node: node,
       message: 'Name repeats the role the screen reader already announces: "${node.name}, Przycisk".',
+    );
+  }
+
+  static A11yFinding? _nameRepeated(A11yNode node) {
+    if (node.name.isEmpty || node.value.trim().toLowerCase() != node.name.trim().toLowerCase()) return null;
+
+    return A11yFinding(
+      rule: 'name-repeated',
+      wcag: '4.1.2',
+      severity: A11ySeverity.warning,
+      node: node,
+      message: 'Value repeats the name, so it is read twice: "${node.name}, ${node.value}". Drop the value.',
+    );
+  }
+
+  static A11yFinding? _usageHintInName(A11yNode node) {
+    if (!_usageHint.hasMatch(node.name)) return null;
+
+    return A11yFinding(
+      rule: 'usage-hint-in-name',
+      wcag: '4.1.2',
+      severity: A11ySeverity.warning,
+      node: node,
+      message: 'Name carries a usage instruction the screen reader adds itself, so users hear it twice.',
     );
   }
 

@@ -37,13 +37,19 @@ class A11ySnapshot {
   };
 
   static void _collect(SemanticsNode node, Matrix4 toGlobal, List<A11yNode> out) {
-    final a11yNode = A11yNode.fromSemantics(node, MatrixUtils.transformRect(toGlobal, node.rect));
-    if (!node.isInvisible && (a11yNode.hasContent || a11yNode.isTappable)) out.add(a11yNode);
-
+    final descendants = <A11yNode>[];
     for (final child in node.debugListChildrenInOrder(DebugSemanticsDumpOrder.traversalOrder)) {
       if (child.isMergedIntoParent) continue;
       final childTransform = child.transform;
-      _collect(child, childTransform == null ? toGlobal : toGlobal.multiplied(childTransform), out);
+      _collect(child, childTransform == null ? toGlobal : toGlobal.multiplied(childTransform), descendants);
     }
+
+    final a11yNode = A11yNode.fromSemantics(
+      node,
+      MatrixUtils.transformRect(toGlobal, node.rect),
+      hasNamedDescendants: descendants.any((descendant) => descendant.hasContent),
+    );
+    if (!node.isInvisible && (a11yNode.hasContent || a11yNode.isTappable)) out.add(a11yNode);
+    out.addAll(descendants);
   }
 }
