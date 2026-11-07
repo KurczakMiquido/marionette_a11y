@@ -24,7 +24,9 @@ Each probe has `run.sh <device> <appId> <out.json>`: builds the probe if needed,
 format below, exits non-zero with a one-line reason on failure.
 
 - Android `<device>`: adb serial, e.g. `emulator-5580`. `<appId>`: package name.
-- iOS `<device>`: simulator UDID. `<appId>`: bundle identifier.
+- iOS `<device>`: simulator UDID, any case. `<appId>`: bundle identifier.
+- iOS gives each run its own log and result bundle (`build/run.XXXXXX/`, removed after a successful run), so runs on
+  different simulators can go in parallel.
 
 ## Native tree format: `a11y-native/v1`
 
