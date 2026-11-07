@@ -24,13 +24,24 @@ class Screenshotter {
       final result = await _run(adb, ['-s', device, 'exec-out', 'screencap', '-p']);
       return _checked(adb, Uint8List.fromList(result.stdout as List<int>));
     }
-    final tmp = await Directory.systemTemp.createTemp('a11y_screenshot_');
+    final Directory tmp;
+    try {
+      tmp = await Directory.systemTemp.createTemp('a11y_screenshot_');
+    } on FileSystemException catch (e) {
+      throw CliFailure('cannot create a temporary directory: ${e.osError?.message ?? e.message}');
+    }
     try {
       final file = File('${tmp.path}/screen.png');
       await _run(xcrun, ['simctl', 'io', device, 'screenshot', '--type=png', file.path]);
       return _checked(xcrun, file.existsSync() ? await file.readAsBytes() : Uint8List(0));
+    } on FileSystemException catch (e) {
+      throw CliFailure('cannot read the screenshot: ${e.osError?.message ?? e.message}');
     } finally {
-      await tmp.delete(recursive: true);
+      try {
+        await tmp.delete(recursive: true);
+      } on FileSystemException {
+        // A leftover temp dir is not worth failing the report.
+      }
     }
   }
 

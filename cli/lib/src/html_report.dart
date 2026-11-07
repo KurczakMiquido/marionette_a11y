@@ -9,7 +9,7 @@ import 'models/finding_group.dart';
 /// Renders a [CheckReport] as one self-contained HTML page: header, the screenshot with a numbered box per finding
 /// group, the findings and the transcript.
 class HtmlReport {
-  const HtmlReport(this.report, {required this.device, required this.time, this.screenshot});
+  const HtmlReport(this.report, {required this.device, required this.time, this.screenshot, this.locale = 'pl'});
 
   static const _escape = HtmlEscape();
 
@@ -23,6 +23,9 @@ class HtmlReport {
 
   /// PNG of the screen; without it the boxes sit on an empty frame.
   final List<int>? screenshot;
+
+  /// Language of the transcript (`pl` or `en`), as given to `--locale`; marks it up for screen readers (WCAG 3.1.2).
+  final String locale;
 
   String render() {
     final groups = FindingGroup.of(report);
@@ -72,16 +75,18 @@ ${_transcript()}
   String _screen(List<FindingGroup> groups) {
     final screen = report.native.screen;
     final png = screenshot;
+    // Unitless width over height; the stylesheet caps the frame's width so its height fits the window.
+    final ratio = '--ar:${_number(double.parse((screen.width / screen.height).toStringAsFixed(4)))}';
     final frame = png == null
-        ? '<div class="frame empty" style="aspect-ratio:${_number(screen.width)} / ${_number(screen.height)}">'
-        : '<div class="frame"><img src="data:image/png;base64,${base64Encode(png)}" alt="Screenshot of the checked screen">';
+        ? '<div class="frame empty" style="aspect-ratio:${_number(screen.width)} / ${_number(screen.height)};$ratio">'
+        : '<div class="frame" style="$ratio"><img src="data:image/png;base64,${base64Encode(png)}" alt="Screenshot of the checked screen">';
     final boxes = [
       for (final g in groups)
         if (g.rect case final rect?)
           '<a class="box ${_class(g.severity)}" href="#g${g.number}" data-group="${g.number}" '
               'style="left:${_percent(rect.left / screen.width)};top:${_percent(rect.top / screen.height)};'
               'width:${_percent(rect.width / screen.width)};height:${_percent(rect.height / screen.height)}" '
-              'aria-label="${g.number}: ${_e(_target(g))}"><span class="badge">${g.number}</span></a>',
+              'aria-label="${g.number}: ${_e(g.severity)}, ${_e(_target(g))}"><span class="badge">${g.number}</span></a>',
     ];
     return '<section class="screen" aria-label="Screen">\n$frame\n${boxes.join('\n')}\n</div>\n</section>';
   }
@@ -121,7 +126,7 @@ ${_transcript()}
     final lines = report.transcript;
     final body = lines.isEmpty
         ? '<p class="none">Nothing is announced.</p>'
-        : '<ol class="transcript">${[for (final line in lines) '<li>${_e(line)}</li>'].join()}</ol>';
+        : '<ol class="transcript" lang="${_e(locale)}">${[for (final line in lines) '<li>${_e(line)}</li>'].join()}</ol>';
     return '<section class="speech">\n<h2>Transcript</h2>\n$body\n</section>';
   }
 

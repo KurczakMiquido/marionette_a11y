@@ -41,6 +41,9 @@ class CheckCommand extends ProbeCommand {
         native,
       ).withFlutter(flutterFindings: await client.audit(), transcript: snapshot.transcript);
       writeJson(report.toJson());
+      // The check ran: print its result before the HTML, whose write can fail.
+      out.write(report.summary());
+      err.writeln('Wrote $outPath');
       if (htmlPath != null) {
         final misalignment = screenshot == null ? null : Screenshotter.misalignment(screenshot, native.screen);
         if (misalignment != null) err.writeln('a11y: $misalignment');
@@ -49,12 +52,11 @@ class CheckCommand extends ProbeCommand {
           device: argResults!.option('device')!,
           time: DateTime.now(),
           screenshot: screenshot,
+          locale: argResults!.option('locale')!,
         ).render();
         writeText(htmlPath, html);
+        err.writeln('Wrote $htmlPath');
       }
-      out.write(report.summary());
-      err.writeln('Wrote $outPath');
-      if (htmlPath != null) err.writeln('Wrote $htmlPath');
       return 0;
     } finally {
       await client.close();

@@ -65,8 +65,13 @@ Finding _finding(
   wcag: wcag,
 );
 
-String _render(CheckReport report, {List<int>? screenshot}) =>
-    HtmlReport(report, device: 'emulator-5580', time: DateTime(2026, 11, 7, 9, 5), screenshot: screenshot).render();
+String _render(CheckReport report, {List<int>? screenshot, String locale = 'pl'}) => HtmlReport(
+  report,
+  device: 'emulator-5580',
+  time: DateTime(2026, 11, 7, 9, 5),
+  screenshot: screenshot,
+  locale: locale,
+).render();
 
 /// `(class, number)` of every box, in document order.
 List<(String, String)> _boxes(String html) => [
@@ -182,10 +187,34 @@ void main() {
     expect(html, contains('<span class="target">at [5.4, 6.6, 7, 8]</span>'));
   });
 
+  test('on a wide viewport the screen is sized to fit the window height, so no box is cut off', () {
+    final html = _render(_report([]), screenshot: fakePng(800, 1600));
+
+    expect(html, contains('<div class="frame" style="--ar:0.5">'));
+    expect(html, contains('100vh'));
+  });
+
+  test('the transcript carries the check locale as its language', () {
+    final html = _render(_report([], transcript: ['Save, Button']), locale: 'en');
+
+    expect(html, contains('<ol class="transcript" lang="en">'));
+  });
+
+  test('a box names its group and the worst severity in it', () {
+    final html = _render(
+      _report([
+        _finding('a', severity: 'info', nativePath: '0', rect: const A11yRect(10, 10, 20, 20)),
+        _finding('b', severity: 'error', nativePath: '0', rect: const A11yRect(10, 10, 20, 20)),
+      ]),
+    );
+
+    expect(html, contains('aria-label="1: error, '));
+  });
+
   test('the transcript is an ordered list', () {
     final html = _render(_report([], transcript: ['Umów wizytę', 'E-mail, Pole edycji']));
 
-    expect(html, contains('<ol class="transcript"><li>Umów wizytę</li><li>E-mail, Pole edycji</li></ol>'));
+    expect(html, contains('<ol class="transcript" lang="pl"><li>Umów wizytę</li><li>E-mail, Pole edycji</li></ol>'));
   });
 
   test('the screenshot is embedded as a PNG data URI', () {
@@ -201,7 +230,7 @@ void main() {
     final html = _render(_report([_finding('a', rect: const A11yRect(0, 0, 1, 1))]));
 
     expect(html, isNot(contains('<img')));
-    expect(html, contains('<div class="frame empty" style="aspect-ratio:400 / 800">'));
+    expect(html, contains('<div class="frame empty" style="aspect-ratio:400 / 800;--ar:0.5">'));
     expect(_boxes(html), hasLength(1));
   });
 

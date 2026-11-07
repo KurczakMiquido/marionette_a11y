@@ -32,6 +32,8 @@ main { display: grid; gap: 24px; }
 @media (min-width: 900px) {
   main { grid-template-columns: minmax(280px, 400px) minmax(0, 1fr); align-items: start; }
   .screen { grid-row: span 2; position: sticky; top: 16px; }
+  /* The whole screen stays in view: width follows from the window height and the screen's aspect ratio (--ar). */
+  .frame { width: min(100%, calc((100vh - 34px) * var(--ar, 0.5))); }
 }
 .error { --c: var(--box-error); --on: #ffffff; --t: var(--text-error); }
 .warning { --c: var(--box-warning); --on: #1b1c1f; --t: var(--text-warning); }

@@ -244,6 +244,16 @@ void main() {
       expect(File(htmlFile).existsSync(), isFalse);
     });
 
+    test('an unwritable --html path still prints the summary, then exits 1', () async {
+      final adb = await fakeTool('adb', 'cat "${await tempFile(fakePng(1080, 2400))}"');
+      htmlFile = '${tmp.path}/missing/check.html';
+
+      expect(await check(adb), 1);
+
+      expect(out.toString(), startsWith('error: 7, warning: 7, info: 0\n'));
+      expect(err.toString(), contains('cannot write $htmlFile'));
+    });
+
     test('without --html no screenshot is taken', () async {
       final adb = await fakeTool('adb', 'true');
 

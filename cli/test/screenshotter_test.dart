@@ -65,6 +65,18 @@ void main() {
       );
     });
 
+    test('a file that cannot be read fails with a reason, not a crash', () async {
+      final xcrun = await fakeTool(
+        'xcrun',
+        'cp "${await tempFile(fakePng(1206, 2622))}" "\${@: -1}"; chmod 000 "\${@: -1}"',
+      );
+
+      expect(
+        Screenshotter(platform: 'ios', device: 'UDID-1', xcrun: xcrun).capture(),
+        throwsA(isA<CliFailure>().having((e) => e.message, 'message', startsWith('cannot read the screenshot: '))),
+      );
+    });
+
     test('a tool that cannot run fails with its path', () {
       expect(
         const Screenshotter(platform: 'android', device: 'd', adb: '/nonexistent/adb').capture(),

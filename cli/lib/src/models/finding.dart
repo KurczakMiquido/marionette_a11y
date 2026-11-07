@@ -1,6 +1,6 @@
 import 'a11y_rect.dart';
 
-/// One problem in an `a11y-check/v1` report: a cross-check rule or a native issue passed through.
+/// One problem in an `a11y-check/v1` report: a cross-check rule, an in-app audit finding or a native issue.
 class Finding {
   const Finding({
     required this.rule,
@@ -18,7 +18,7 @@ class Finding {
 
   final String rule;
 
-  /// `crosscheck`, or the native issue's source (`atf`, `apple`).
+  /// `crosscheck`, `flutter` (the in-app audit), or the native issue's source (`atf`, `apple`).
   final String source;
   final String severity;
   final String message;
