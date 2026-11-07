@@ -3,6 +3,9 @@
 Deferred during review; none blocks use. Next milestone candidates first.
 
 ## Next milestone
+Done in milestone 2 (`docs/specs/report-and-testing.md`) except CI pipeline files; remaining items in
+`docs/plans/report-and-testing-followups.md`.
+
 - HTML report with screenshots and boxes from real rects (Android and iOS).
 - Agent skill `a11y-audit` driving the loop (marionette MCP + `a11y check`).
 - Role-comparison rule: a tappable Flutter node exposed natively as plain text (title with a back-arrow tap target).
