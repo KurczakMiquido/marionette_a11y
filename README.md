@@ -7,14 +7,56 @@ PoC: Flutter's semantics tree as marionette MCP tools, so an agent can check wha
 | `a11y_snapshot` | `transcript` (what TalkBack reads, in swipe order) plus semantics `nodes` |
 | `a11y_audit` | WCAG 2.2 findings: `missing-name`, `missing-role`, `target-size`, `generic-name`, `role-in-name`, `name-repeated`, `target-size-platform`, `usage-hint-in-name`, `duplicate-name`, `no-heading` |
 
+## Check your own app
+
+Requirements:
+- The app builds with Flutter 3.44 or newer (`flutter --version`). The CLI alone needs Dart 3.8 or newer.
+- Android: `ANDROID_HOME` set, JDK 17, an emulator with Android 11+.
+- iOS: Xcode, a simulator with iOS 17+.
+- `python3`.
+
+1. Clone this repo and get the CLI's packages:
+   ```bash
+   git clone https://github.com/KurczakMiquido/marionette_a11y.git
+   cd marionette_a11y/cli && dart pub get
+   ```
+2. In the app, wire the package in as shown in [Wire it in](#wire-it-in-debug-only-never-commit-to-the-app). Keep it
+   local, do not commit it.
+3. Run the app in debug on an emulator or simulator (`flutter run`), copy the `http://127.0.0.1:<port>/<token>=/` URI
+   it prints, and open the screen to check.
+4. From `marionette_a11y/cli`:
+   ```bash
+   dart run a11y_cli:a11y check --platform android --device <adb serial> --app <applicationId> \
+     --vm-service <URI from flutter run> --out app.json --html app.html
+   ```
+   On iOS: `--platform ios --device <simulator UDID> --app <bundle id>`. Open `app.html` for the report. The first run
+   builds the probe, which takes minutes. For the next screen, open it in the app and run the command again.
+5. Undo the wiring in the app: `git checkout pubspec.yaml pubspec.lock lib/main.dart`.
+
+Watch out for:
+- An app that already depends on another `marionette_flutter` version: `pub get` fails until it uses 0.6.0.
+- An app with its own binding class: `MarionetteBinding.ensureInitialized()` replaces the binding, so adapt that
+  setup for the check.
+- Flavors: `--app` is the full applicationId or bundle id of the flavor you run, e.g. with a `.dev` suffix.
+- Screens with `FLAG_SECURE`, such as payments: ATF gets a black screenshot and skips its contrast checks.
+
+With an agent instead of steps 3–5: install the MCP server (`dart pub global activate marionette_mcp`), register
+`marionette_mcp` as an MCP server for the app's project in Claude Code, link the [agent skill](#agent-skill) and ask
+Claude to check a screen's accessibility.
+
 ## Wire it in (debug only, never commit to the app)
 
 ```yaml
 dependencies:
   marionette_flutter: 0.6.0
   marionette_a11y:
-    path: ../marionette_a11y
+    git:
+      url: https://github.com/KurczakMiquido/marionette_a11y.git
 ```
+
+A local clone works too: `marionette_a11y: {path: ../marionette_a11y}`. In `main.dart`, first thing in `main()`,
+before any `WidgetsFlutterBinding.ensureInitialized()` (keep that call for release builds), with imports
+`package:marionette_flutter/marionette_flutter.dart` and `package:marionette_a11y/marionette_a11y.dart`:
 
 ```dart
 if (kDebugMode) {
